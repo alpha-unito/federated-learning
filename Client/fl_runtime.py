@@ -1,4 +1,3 @@
-import requests 
 import paho.mqtt.client as mqtt
 
 def on_connect(client, userdata, flags, rc):
@@ -20,5 +19,6 @@ client.on_connect = on_connect
 client.on_message = on_message
 
 def device_connection_to_server():
-    # client.publish("topic/fl-broadcast", "Hello world!");
-    client.loop_forever()
+    client.publish("topic/fl-broadcast", "Hello world!");
+    print("published message to 'topic/fl-broadcast'")
+    # client.loop_forever()
