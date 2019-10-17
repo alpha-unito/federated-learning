@@ -25,12 +25,10 @@ api.add_resource(Selector, '/selector') # Route_1
 
 if __name__ == "__main__":
     print(ActorSystem().ask(coordinator_instance, Message(MsgType.GREETINGS, 'hi'), 1))
-    print(ActorSystem().ask(aggregator_instance, Message(MsgType.GREETINGS, 'hi'), 1))
     print(ActorSystem().ask(selector_instance, Message(MsgType.GREETINGS, 'hi'), 1))
 
     # START SERVER API
     app.run(port='5002')
 
-    ActorSystem().tell(c, ActorExitRequest())
-    ActorSystem().tell(a, ActorExitRequest())
-    ActorSystem().tell(s, ActorExitRequest())
+    ActorSystem().tell(coordinator_instance, ActorExitRequest())
+    ActorSystem().tell(selector_instance, ActorExitRequest())
