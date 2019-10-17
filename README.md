@@ -1,3 +1,3 @@
 # federated-learning-opt
 
-Thesis for bechelor degree in computer science
+Thesis for master's degree in computer science
