@@ -8,6 +8,7 @@ import threading
 
 class selector_actor(Actor):
 
+    # ********* MQTT COMMUNICATION **********************
     def on_connect(client, userdata, flags, rc):
         print("Connected with result code "+str(rc))
         client.subscribe("topic/fl-broadcast")
@@ -25,16 +26,15 @@ class selector_actor(Actor):
         client.loop_forever()
         print("finished loop forever")
     
-    
+    # ***************************************************
+
     def receiveMessage(self, message: Message, sender):
         """
-        if message.get_type() == MsgType.DEVICE:
-            self.connected_devices.append("Device {}".format(datetime.now()))
-            print(self.connected_devices)
+        Actor for devices selection and aggregation call
         """
         if message.get_type() == MsgType.DEVICES_REQUEST:
-            pass
-            # ActorSystem().ask(aggregator_instance, Message(MsgType.AGGREGATION, self.connected_devices), 1)            
+            # pass
+            ActorSystem().ask(aggregator_instance, Message(MsgType.AGGREGATION, self.connected_devices), 1)            
 
         elif message.get_type() == MsgType.GREETINGS:
             self.send(sender, 'Hello, World from Selector!')
