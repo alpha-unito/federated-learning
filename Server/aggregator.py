@@ -5,7 +5,7 @@ from model_utils import MODEL as model_fn
 class aggregator_actor(Actor):
 
     def receiveMessage(self, message, sender):
-        if message.get_type() == MsgType.DEVICES_REQUEST:
+        if message.get_type() == MsgType.AGGREGATION:
             print("aggregation process")
             # Training the model over the collected federated data
             iterative_process = tff.learning.build_federated_averaging_process(model_fn)
@@ -17,6 +17,6 @@ class aggregator_actor(Actor):
             data from a new randomly selected sample of users for each round.
             """
             pass
-        
+
         elif message.get_type() == MsgType.GREETINGS:
             self.send(sender, 'Hello, World from Aggregator!')

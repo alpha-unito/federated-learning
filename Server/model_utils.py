@@ -7,12 +7,13 @@ import six
 import tensorflow as tf
 import tensorflow_federated as tff
 
-NUM_CLIENTS = 10
+NUM_CLIENTS = 5
 NUM_EPOCHS = 10
 BATCH_SIZE = 20
 SHUFFLE_BUFFER = 500
 
 MODEL = None
+emnist_train, emnist_test = None, None
 
 warnings.simplefilter('ignore')
 tf.compat.v1.enable_v2_behavior()
@@ -33,7 +34,7 @@ def init_model():
     model = create_compiled_keras_model()
     MODEL = keras_model_to_fn(model)
 
-    # init_dataset()
+    emnist_train, emnist_test = tff.simulation.datasets.emnist.load_data()
 
 
 
@@ -59,34 +60,33 @@ def keras_model_to_fn(keras_model):
 
 
 
-def init_dataset():
-    """
-    download and prepare the dataset
-    """
-    emnist_train, emnist_test = tff.simulation.datasets.emnist.load_data()
-    print('Dataset length: ', len(emnist_train.client_ids))
-
-    emnist_train.output_types, emnist_train.output_shapes
-
-    example_dataset = emnist_train.create_tf_dataset_for_client(emnist_train.client_ids[0])
-
-    # preprocess data transforming images into lists
-    preprocessed_example_dataset = preprocess(example_dataset)
-
-    sample_batch = tf.nest.map_structure(lambda x: x.numpy(), iter(preprocessed_example_dataset).next())
-
-    return sample_batch
-
-
-
 def preprocess(dataset):
+    """
+    helper preprocess for building federated data
+    """
+    def element_fn(element):
+        return collections.OrderedDict([
+            ('x', tf.reshape(element['pixels'], [-1])),
+            ('y', tf.reshape(element['label'], [1])),
+        ])
 
-  def element_fn(element):
-    return collections.OrderedDict([
-        ('x', tf.reshape(element['pixels'], [-1])),
-        ('y', tf.reshape(element['label'], [1])),
-    ])
+    return dataset.repeat(NUM_EPOCHS).map(element_fn).shuffle(
+        SHUFFLE_BUFFER).batch(BATCH_SIZE)
 
-  return dataset.repeat(NUM_EPOCHS).map(element_fn).shuffle(
-      SHUFFLE_BUFFER).batch(BATCH_SIZE)
-    
+
+def make_federated_data(client_data, client_ids):
+    """
+    CLIENT simulates federated data from clients
+    """
+    return [preprocess(client_data.create_tf_dataset_for_client(x))
+            for x in client_ids]
+
+
+def build_test_clients():
+    # Selects clients
+    sample_clients = emnist_train.client_ids[0:NUM_CLIENTS]
+
+    # select training data related to selected clients
+    federated_train_data = make_federated_data(emnist_train, sample_clients)
+
+    return sample_clients, federated_train_data

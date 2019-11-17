@@ -12,5 +12,5 @@ class coordinator_actor(Actor):
 
             # define a new aggregator instance and make a request to selector passing it
             aggregator_instance = ActorSystem().createActor(aggregator_actor)
-            ActorSystem().ask(aggregator_instance, Message(MsgType.DEVICES_REQUEST, aggregator_instance), 1)
+            ActorSystem().ask(selector_instance, Message(MsgType.DEVICES_REQUEST, aggregator_instance), 1)
             

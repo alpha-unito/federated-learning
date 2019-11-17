@@ -17,3 +17,16 @@ class Message(object):
 
     def get_body(self):
         return self.__type
+
+
+class Device(object):
+  
+    def __init__(self, id: int, dataset):
+        self.__id = id
+        self.__dataset = dataset
+
+    def get_id(self):
+        return self.__id
+
+    def get_dataset(self):
+        return self.__dataset
