@@ -1,6 +1,7 @@
 from coordinator import coordinator_actor
-# from aggregator import aggregator_actor
 from selector import selector_actor
+
+from model_utils import init_model
 
 from thespian.actors import *
 from common import *
@@ -10,6 +11,7 @@ coordinator_instance = ActorSystem().createActor(coordinator_actor)
 selector_instance = ActorSystem().createActor(selector_actor)
 
 if __name__ == "__main__":
+    init_model()
     print(ActorSystem().ask(coordinator_instance, Message(MsgType.GREETINGS, 'hi'), 1))
     print(ActorSystem().ask(selector_instance, Message(MsgType.GREETINGS, 'hi'), 1))
 
