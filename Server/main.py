@@ -15,7 +15,7 @@ if __name__ == "__main__":
     init_model()
 
     # INIT SERVER ACTORS
-    print(ActorSystem().ask(coordinator_instance, Message(MsgType.GREETINGS, 'hi'), 1))
+    print(ActorSystem().ask(coordinator_instance, Message(MsgType.GREETINGS, selector_instance), 1))
     print(ActorSystem().ask(selector_instance, Message(MsgType.GREETINGS, 'hi'), 1))
 
     # TERMINATE ACTORS

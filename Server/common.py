@@ -16,7 +16,7 @@ class Message(object):
         return self.__type
 
     def get_body(self):
-        return self.__type
+        return self.__body
 
 
 class Device(object):

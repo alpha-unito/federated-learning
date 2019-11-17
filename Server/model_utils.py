@@ -13,7 +13,11 @@ BATCH_SIZE = 20
 SHUFFLE_BUFFER = 500
 
 MODEL = None
-emnist_train, emnist_test = None, None
+
+print('\nImporting test dataset...')
+emnist_train, emnist_test = tff.simulation.datasets.emnist.load_data()
+print('Test dataset imported.\n')
+
 
 warnings.simplefilter('ignore')
 tf.compat.v1.enable_v2_behavior()
@@ -31,12 +35,17 @@ if six.PY3:
 
 
 def init_model():
+    global MODEL
+
+    print('\nInitializing model...')
     model = create_compiled_keras_model()
     MODEL = keras_model_to_fn(model)
+    print('Model initialized.\n')
 
-    emnist_train, emnist_test = tff.simulation.datasets.emnist.load_data()
 
-
+def get_model():
+    global MODEL
+    return MODEL
 
 def create_compiled_keras_model():
     model = tf.keras.models.Sequential([
@@ -47,6 +56,7 @@ def create_compiled_keras_model():
         loss=tf.keras.losses.SparseCategoricalCrossentropy(),
         optimizer=tf.keras.optimizers.SGD(learning_rate=0.02),
         metrics=[tf.keras.metrics.SparseCategoricalAccuracy()])
+
     return model
 
 
@@ -55,7 +65,11 @@ def keras_model_to_fn(keras_model):
     """
     Transform linear model into a federated learning model (different optimization function)
     """
-    keras_model = create_compiled_keras_model()
+    example_dataset = emnist_train.create_tf_dataset_for_client(emnist_train.client_ids[0])
+    preprocessed_example_dataset = preprocess(example_dataset)
+
+    sample_batch = tf.nest.map_structure(lambda x: x.numpy(), iter(preprocessed_example_dataset).next())
+    
     return tff.learning.from_compiled_keras_model(keras_model, sample_batch)
 
 
