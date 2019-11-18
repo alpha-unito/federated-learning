@@ -21,7 +21,7 @@ class Message(object):
 
 class Device(object):
   
-    def __init__(self, id: int, dataset):
+    def __init__(self, id, dataset):
         self.__id = id
         self.__dataset = dataset
 
