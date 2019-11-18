@@ -10,7 +10,7 @@ class coordinator_actor(Actor):
             self.send(sender, 'Hello, World from Coordinator!')
             
             while True:
-                for i in range(1,21):
+                for i in range(1,61):
                     print('Waiting {}...'.format(i))
                     time.sleep(1)
 

@@ -8,8 +8,10 @@ class aggregator_actor(Actor):
     def receiveMessage(self, message, sender):
         if message.get_type() == MsgType.AGGREGATION:
             print("\n**Aggregation process**\n")
-            sample_clients, federated_train_data = build_test_clients()
+            devices = message.get_body()
             
+            federated_train_data = [device.get_dataset() for device in devices]
+
             federated_aggregation(federated_train_data)
 
         elif message.get_type() == MsgType.GREETINGS:

@@ -19,10 +19,11 @@ class selector_actor(Actor):
 
 
     def on_message(client, userdata, msg):
-        print("Device communication received ")
-        if msg.payload.decode() == "Hello world!":
-            print("Yes!")
-            connected_devices.append("Device {}".format(datetime.now()))
+        print("\nDevice communication received ")
+        try:
+            connected_devices.append(Device(msg['device'], msg['data']))
+        except:
+            print('Unsupported Device X')
 
     
     def mqtt_listener(client):
@@ -39,13 +40,10 @@ class selector_actor(Actor):
         if message.get_type() == MsgType.DEVICES_REQUEST:
             aggregator_instance = message.get_body()
             
-            ActorSystem().ask(aggregator_instance, Message(MsgType.AGGREGATION, self.connected_devices), 1)
+            if len(self.connected_devices) > 0:
+                ActorSystem().ask(aggregator_instance, Message(MsgType.AGGREGATION, self.connected_devices), 1)
 
         elif message.get_type() == MsgType.GREETINGS:
-            # only for test purpose. TODO: remove
-            clients, data = build_test_clients()
-            connected_devices = [Device(clients[i], data[i]) for i in range(len(clients))]
-            #--------------------------------------
             self.send(sender, 'Hello, World from Selector!')
 
 

@@ -1,9 +1,9 @@
 from __future__ import absolute_import, division, print_function
 import collections
 import warnings
-from six.moves import range
 import numpy as np
 import six
+from six.moves import range
 import tensorflow as tf
 import tensorflow_federated as tff
 import datetime
@@ -14,7 +14,7 @@ NUM_EPOCHS = 10
 BATCH_SIZE = 20
 SHUFFLE_BUFFER = 500
 
-MODEL = None
+
 
 warnings.simplefilter('ignore')
 tf.compat.v1.enable_v2_behavior()
@@ -58,17 +58,6 @@ print('Test dataset imported.\n')
 
 
 
-"""
-def init_model():
-    global MODEL
-
-    print('\nInitializing model...')
-    MODEL = keras_model_to_fn(model)
-    print('Model initialized.\n')
-"""
-
-
-
 def create_compiled_keras_model():
     model = tf.keras.models.Sequential([
         tf.keras.layers.Dense(
@@ -91,27 +80,6 @@ def model_fn():
 
     global sample_batch
     return tff.learning.from_compiled_keras_model(model, sample_batch)
-
-
-
-
-def make_federated_data(client_data, client_ids):
-    """
-    CLIENT simulates federated data from clients
-    """
-    return [preprocess(client_data.create_tf_dataset_for_client(x))
-            for x in client_ids]
-
-
-
-def build_test_clients():
-    # Selects clients
-    sample_clients = emnist_train.client_ids[0:NUM_CLIENTS]
-
-    # select training data related to selected clients
-    federated_train_data = make_federated_data(emnist_train, sample_clients)
-
-    return sample_clients, federated_train_data
 
 
 
