@@ -6,13 +6,31 @@ import collections
 from numpy import array
 import collections
 import tensorflow as tf
+import numpy as np
+
+
+def element_fn(element):
+        return collections.OrderedDict([
+            ('x', tf.reshape(element['pixels'], [-1])),
+            ('y', tf.reshape(element['label'], [1])),
+        ])
+
 
 msg_obj = json.loads(payload)
 print('device: ', msg_obj['device'])
 
+"""
 data = collections.OrderedDict([
-                (key, array(value))
+                (key, np.asarray(value, dtype=np.float32))
                 for key, value in msg_obj['data'].items()
-            ])                
-            
-print(data)
+            ])              
+"""
+
+data = collections.OrderedDict([
+            ('x', [tf.convert_to_tensor(msg_obj['data']['x'], dtype=tf.float32)]),
+            ('y', [tf.convert_to_tensor(msg_obj['data']['y'], dtype=tf.int32)]),
+        ])
+
+
+dataset = tf.data.Dataset.from_tensor_slices(data)
+print(dataset)

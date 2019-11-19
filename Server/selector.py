@@ -9,7 +9,7 @@ import json
 import collections
 import numpy as np
 from numpy import array
-
+import tensorflow as tf
 #TODO: REMOVE
 from aggregator import aggregator_actor
 
@@ -31,12 +31,13 @@ class selector_actor(Actor):
             print('device: ', msg_obj['device'])
 
             data = collections.OrderedDict([
-                (key, np.asarray(value, dtype=np.float32))
+                (key, np.asarray((None, value), dtype=np.float32))
                 for key, value in msg_obj['data'].items()
             ])                
             
-            print(data)
-            device = Device(msg_obj['device'], data)
+            dataset = tf.data.Dataset.from_tensor_slices(data)
+            print(dataset)
+            device = Device(msg_obj['device'], dataset)
             ActorSystem().ask(ActorSystem().createActor(aggregator_actor), Message(MsgType.AGGREGATION, [device]), 1)
         
         except expression as identifier:

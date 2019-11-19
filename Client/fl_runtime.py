@@ -37,6 +37,15 @@ def preprocess(dataset):
         SHUFFLE_BUFFER).batch(BATCH_SIZE)
 
 
+"""
+NOTE: The data sets returned by load_data() are instances of tff.simulation.ClientData, an interface that allows 
+you to enumerate the set of users, to construct a tf.data.Dataset that represents the data of a particular 
+user, and to query the structure of individual elements. Here's how you can use this interface to explore 
+the content of the data set. Keep in mind that while this interface allows you to iterate over clients ids, 
+this is only a feature of the simulation data. As you will see shortly, client identities are not used by 
+the federated learning framework - their only purpose is to allow you to select subsets of the data for simulations.
+"""
+
 print('\nImporting test dataset...')
 emnist_train, emnist_test = tff.simulation.datasets.emnist.load_data()
 
@@ -75,9 +84,10 @@ def device_connection_to_server():
 
     # select training data related to selected clients
     federated_train_data = preprocess(emnist_train.create_tf_dataset_for_client(sample_client))
-    
+    print(federated_train_data)
     send_msg = {
         'device': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        #'data': federated_train_data
         'data': tf.nest.map_structure(lambda x: x.numpy().tolist(), iter(federated_train_data).next())
     }
     
