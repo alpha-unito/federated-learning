@@ -90,7 +90,7 @@ def device_connection_to_server():
         #'data': federated_train_data
         'data': tf.nest.map_structure(lambda x: x.numpy().tolist(), iter(federated_train_data).next())
     }
-    
+
     client.publish("topic/fl-broadcast", json.dumps(send_msg));
     # client.publish("topic/fl-broadcast", payload=json.dumps(send_msg), qos=2, retain=False);
     #client.publish("topic/fl-broadcast", "Hello from device");

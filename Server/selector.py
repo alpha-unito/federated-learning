@@ -31,10 +31,10 @@ class selector_actor(Actor):
             print('device: ', msg_obj['device'])
 
             data = collections.OrderedDict([
-                (key, np.asarray((None, value), dtype=np.float32))
-                for key, value in msg_obj['data'].items()
-            ])                
-            
+                ('x', np.array([msg_obj['data']['x']], dtype=np.float32)),
+                ('y', np.array([msg_obj['data']['y']], dtype=np.int32)),
+            ])
+
             dataset = tf.data.Dataset.from_tensor_slices(data)
             print(dataset)
             device = Device(msg_obj['device'], dataset)

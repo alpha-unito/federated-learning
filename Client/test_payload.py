@@ -19,18 +19,16 @@ def element_fn(element):
 msg_obj = json.loads(payload)
 print('device: ', msg_obj['device'])
 
-"""
 data = collections.OrderedDict([
-                (key, np.asarray(value, dtype=np.float32))
-                for key, value in msg_obj['data'].items()
-            ])              
-"""
+    ('x', np.array([msg_obj['data']['x']], dtype=np.float32)),
+    ('y', np.array([msg_obj['data']['y']], dtype=np.int32)),
+])     
 
-data = collections.OrderedDict([
-            ('x', [tf.convert_to_tensor(msg_obj['data']['x'], dtype=tf.float32)]),
-            ('y', [tf.convert_to_tensor(msg_obj['data']['y'], dtype=tf.int32)]),
-        ])
-
+features, labels = [], []
+for key, val in msg_obj['data'].items():
+    features.append(np.asarray(val))
+    labels.append(key)
 
 dataset = tf.data.Dataset.from_tensor_slices(data)
+
 print(dataset)
