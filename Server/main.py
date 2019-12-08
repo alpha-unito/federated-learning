@@ -1,12 +1,12 @@
-from coordinator import coordinator_actor
-from selector import selector_actor
+from coordinator import CoordinatorActor
+from selector import SelectorActor
 
 from thespian.actors import *
 from common import *
 
 # ACTORS
-coordinator_instance = ActorSystem().createActor(coordinator_actor)
-selector_instance = ActorSystem().createActor(selector_actor)
+coordinator_instance = ActorSystem().createActor(CoordinatorActor)
+selector_instance = ActorSystem().createActor(SelectorActor)
 
 if __name__ == "__main__":
 

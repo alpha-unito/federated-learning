@@ -1,9 +1,9 @@
 from thespian.actors import *
 from common import *
 import time
-from aggregator import aggregator_actor
+from aggregator import AggregatorActor
 
-class coordinator_actor(Actor):
+class CoordinatorActor(Actor):
 
     def receiveMessage(self, message: Message, sender):
         if message.get_type() == MsgType.GREETINGS:
@@ -18,7 +18,7 @@ class coordinator_actor(Actor):
                 time.sleep(1)
 
             # define a new aggregator instance and make a request to selector passing it
-            aggregator_instance = ActorSystem().createActor(aggregator_actor)
+            aggregator_instance = ActorSystem().createActor(AggregatorActor)
             selector_instance = message.get_body()
             ActorSystem().ask(selector_instance, Message(MsgType.DEVICES_REQUEST, aggregator_instance), 1)
             """

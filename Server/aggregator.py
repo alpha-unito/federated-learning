@@ -4,7 +4,7 @@ from model_utils import federated_aggregation
 import json
 import numpy as np
 
-class aggregator_actor(Actor):
+class AggregatorActor(Actor):
 
     def receiveMessage(self, message, sender):
         print('aggregator receive message')
