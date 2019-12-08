@@ -7,6 +7,7 @@ import numpy as np
 class aggregator_actor(Actor):
 
     def receiveMessage(self, message, sender):
+        print('aggregator receive message')
         if message.get_type() == MsgType.AGGREGATION:
             print("\n**Aggregation process**\n")
             devices = message.get_body()

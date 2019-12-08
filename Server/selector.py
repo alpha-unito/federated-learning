@@ -9,6 +9,8 @@ import numpy as np
 from numpy import array
 import tensorflow as tf
 
+from aggregator import aggregator_actor
+
 
 
 class selector_actor(Actor):
@@ -17,14 +19,14 @@ class selector_actor(Actor):
 
     # ********* MQTT COMMUNICATION **********************
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
+        print("\nConnected with result code {code}\n".format(code = rc))
         client.subscribe("topic/fl-broadcast")
 
     def on_message(client, userdata, msg):
         print("\nDevice communication received ")
 
         try:            
-
+            # cast message obj to Device
             msg_obj = json.loads(msg.payload)
             print('device: ', msg_obj['device'])
 
@@ -36,17 +38,24 @@ class selector_actor(Actor):
             dataset = tf.data.Dataset.from_tensor_slices(data)
             print(dataset)
             device = Device(msg_obj['device'], dataset)
-            ActorSystem().ask(ActorSystem().createActor(aggregator_actor), Message(MsgType.AGGREGATION, [device]), 1)
-        
+            
+            selector_actor.store_device(device)
+
         except expression as identifier:
             print('Unsupported Device X', identifier)
     
     def mqtt_listener(client):
-        print("loop forever")
+        print("Start listening on MQTT channel ...")
         client.loop_forever()
-        print("finished loop forever")
+        print("End listening on MQTT channel.")
     
     # ***************************************************
+
+    def store_device(device: Device):
+        print('store_device')
+        # TODO: replace with custom device storage without direct aggregation
+        ActorSystem().ask(ActorSystem().createActor(aggregator_actor), Message(MsgType.AGGREGATION, [device]), 1)
+        print('end store_device')
 
     def receiveMessage(self, message: Message, sender):
         """
@@ -74,4 +83,7 @@ class selector_actor(Actor):
     
     # START NEW THREAD WITH MQTT LISTENER
     thr = threading.Thread(target=mqtt_listener, args=[client])
-    thr.start() # Will run thread
+    try:
+        thr.start() # Will run thread
+    except:
+        print('error on thread')
