@@ -1,8 +1,6 @@
 from thespian.actors import *
 from datetime import datetime
 from common import *
-# import requests 
-# import asyncio
 import paho.mqtt.client as mqtt
 import threading
 import json
@@ -10,8 +8,8 @@ import collections
 import numpy as np
 from numpy import array
 import tensorflow as tf
-#TODO: REMOVE
-from aggregator import aggregator_actor
+
+
 
 class selector_actor(Actor):
 
@@ -77,5 +75,3 @@ class selector_actor(Actor):
     # START NEW THREAD WITH MQTT LISTENER
     thr = threading.Thread(target=mqtt_listener, args=[client])
     thr.start() # Will run thread
-    # thr.is_alive() # Will return whether foo is running currently
-    # thr.join() # Will wait till "foo" is done

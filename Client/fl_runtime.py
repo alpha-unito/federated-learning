@@ -49,9 +49,6 @@ the federated learning framework - their only purpose is to allow you to select 
 print('\nImporting test dataset...')
 emnist_train, emnist_test = tff.simulation.datasets.emnist.load_data()
 
-# example_dataset = emnist_train.create_tf_dataset_for_client(emnist_train.client_ids[0])
-# preprocessed_example_dataset = preprocess(example_dataset)
-# sample_batch = tf.nest.map_structure(lambda x: x.numpy(), iter(preprocessed_example_dataset).next())
 print('Test dataset imported.\n')
 
 
@@ -87,13 +84,9 @@ def device_connection_to_server():
     print(federated_train_data)
     send_msg = {
         'device': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        #'data': federated_train_data
         'data': tf.nest.map_structure(lambda x: x.numpy().tolist(), iter(federated_train_data).next())
     }
 
     client.publish("topic/fl-broadcast", json.dumps(send_msg));
-    # client.publish("topic/fl-broadcast", payload=json.dumps(send_msg), qos=2, retain=False);
-    #client.publish("topic/fl-broadcast", "Hello from device");
     
     print("\npublished message to 'topic/fl-broadcast'")
-    # client.loop_forever()

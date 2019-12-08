@@ -9,8 +9,6 @@ coordinator_instance = ActorSystem().createActor(coordinator_actor)
 selector_instance = ActorSystem().createActor(selector_actor)
 
 if __name__ == "__main__":
-    # INIT FEDERATED LEARNING MODEL
-    # init_model()
 
     # INIT SERVER ACTORS
     print(ActorSystem().ask(selector_instance, Message(MsgType.GREETINGS, 'hi'), 1))
