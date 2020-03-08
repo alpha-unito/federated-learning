@@ -71,15 +71,14 @@ def training():
 def device_connection_to_server():
 
     # select training data related to selected clients
+    model_weights = model.get_weights()
+    # print(model_weights)
 
     # build message object
-    send_msg = {}
-    """
     send_msg = {
         'device': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'data': tf.nest.map_structure(lambda x: x.numpy().tolist(), iter(federated_train_data).next())
+        'data': model_weights
     }
-    """
 
     # publishes on MQTT topic
     client.publish("topic/fl-broadcast", json.dumps(send_msg));
