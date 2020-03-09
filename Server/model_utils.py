@@ -2,25 +2,20 @@ import collections
 import warnings
 import numpy as np
 import six
-from six.moves import range
 import tensorflow as tf
 import tensorflow_federated as tff
 import datetime
-
 
 NUM_CLIENTS = 5
 NUM_EPOCHS = 10
 BATCH_SIZE = 20
 SHUFFLE_BUFFER = 500
 
-
-
 warnings.simplefilter('ignore')
 tf.compat.v1.enable_v2_behavior()
 np.random.seed(0)
 
 print('\nEAGERLY: ', tf.executing_eagerly())
-
 
 """
 NOTE: If the statement below fails, it means that you are
@@ -30,7 +25,6 @@ instead to use the default reference runtime.
 """
 if six.PY3:
   tff.framework.set_default_executor(tff.framework.create_local_executor())
-
 
 
 def preprocess(dataset):
@@ -47,16 +41,6 @@ def preprocess(dataset):
         SHUFFLE_BUFFER).batch(BATCH_SIZE)
 
 
-print('\nImporting test dataset...')
-emnist_train, emnist_test = tff.simulation.datasets.emnist.load_data()
-
-example_dataset = emnist_train.create_tf_dataset_for_client(emnist_train.client_ids[0])
-preprocessed_example_dataset = preprocess(example_dataset)
-sample_batch = tf.nest.map_structure(lambda x: x.numpy(), iter(preprocessed_example_dataset).next())
-print('Test dataset imported.\n')
-
-
-
 def create_compiled_keras_model():
     model = tf.keras.models.Sequential([
         tf.keras.layers.Dense(
@@ -70,7 +54,6 @@ def create_compiled_keras_model():
     return model
 
 
-
 def model_fn():
     """
     Transform linear model into a federated learning model (different optimization function)
@@ -79,7 +62,6 @@ def model_fn():
 
     global sample_batch
     return tff.learning.from_compiled_keras_model(model, sample_batch)
-
 
 
 def federated_aggregation(federated_train_data):

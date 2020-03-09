@@ -4,12 +4,14 @@ import paho.mqtt.client as mqtt
 import tensorflow as tf
 import keras
 from keras.preprocessing.image import ImageDataGenerator
+from json import JSONEncoder
+import numpy
 
 IMAGENET_PATH = '/media/lore/6B6223601B584A05/IMAGENET/'
 TOTAL_IMAGES = 100
 TARGET_SIZE = (224, 224)
 BATCH_SIZE = 20
-EPOCHS = 3
+EPOCHS = 1
 
 model = keras.applications.mobilenet_v2.MobileNetV2()
 
@@ -68,6 +70,13 @@ def training():
     return model
 
 
+class NumpyArrayEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, numpy.ndarray):
+            return obj.tolist()
+        return JSONEncoder.default(self, obj)
+
+
 def device_connection_to_server():
 
     # select training data related to selected clients
@@ -81,6 +90,6 @@ def device_connection_to_server():
     }
 
     # publishes on MQTT topic
-    client.publish("topic/fl-broadcast", json.dumps(send_msg));
+    client.publish("topic/fl-broadcast", json.dumps(send_msg, cls=NumpyArrayEncoder));
     
     print("\npublished message to 'topic/fl-broadcast'")

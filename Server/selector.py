@@ -14,15 +14,15 @@ class SelectorActor(Actor):
         if message.get_type() == MsgType.DEVICES_REQUEST:
             aggregator_instance = message.get_body()
             
-            if len(self.connected_devices) > 0:
+            if len(self.properties['connected_devices']) > 0:
                 print("\nStarting aggregation...\n")
-                ActorSystem().ask(aggregator_instance, Message(MsgType.AGGREGATION, self.connected_devices), 1)
+                ActorSystem().ask(aggregator_instance, Message(MsgType.AGGREGATION, self.properties['connected_devices']), 1)
+
             else:
                 print("\nNo devices connected, skipping aggregation. \n")
 
         elif message.get_type() == MsgType.GREETINGS:
             self.send(sender, 'Hello, World from Selector!')
-
 
     def __init__(self):
         super().__init__()

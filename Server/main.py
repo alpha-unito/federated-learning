@@ -12,7 +12,16 @@ if __name__ == "__main__":
 
     # INIT SERVER ACTORS
     print(ActorSystem().ask(selector_instance, Message(MsgType.GREETINGS, 'hi'), 1))
-    print(ActorSystem().ask(coordinator_instance, Message(MsgType.GREETINGS, selector_instance), 1))
+
+    while True:
+        print(" - Insert 1 for start Federated Aggregation task")
+
+        choice = input()
+
+        if choice == '1':
+            print(ActorSystem().ask(coordinator_instance, Message(MsgType.GREETINGS, selector_instance), 1))
+        else:
+            print("Invalid option.\n")
 
     # TERMINATE ACTORS
     # ActorSystem().tell(coordinator_instance, ActorExitRequest())

@@ -8,10 +8,6 @@ from common import *
 import collections
 from thespian.actors import *
 
-# TODO: REMOVE
-from aggregator import AggregatorActor
-
-
 
 class MqttListener():
     
@@ -30,19 +26,9 @@ class MqttListener():
             msg_obj = json.loads(msg.payload)
             print('device: ', msg_obj['device'])
 
-            data = collections.OrderedDict([
-                ('x', np.array([msg_obj['data']['x']], dtype=np.float32)),
-                ('y', np.array([msg_obj['data']['y']], dtype=np.int32)),
-            ])
-
-            dataset = tf.data.Dataset.from_tensor_slices(data)
-            print(dataset)
-            device = Device(msg_obj['device'], dataset)
+            device = Device(msg_obj['device'], msg_obj['data'])
             
             userdata['connected_devices'].append(device)
-
-            # TODO: REMOVE
-            ActorSystem().ask(ActorSystem().createActor(AggregatorActor), Message(MsgType.AGGREGATION, [device]), 1)
 
         except:
             print('Unsupported Device X')

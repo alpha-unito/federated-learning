@@ -16,9 +16,9 @@ class CoordinatorActor(Actor):
                     print('{} seconds until aggregation...'.format(wait - i))
                 
                 time.sleep(1)
+            """
 
             # define a new aggregator instance and make a request to selector passing it
             aggregator_instance = ActorSystem().createActor(AggregatorActor)
             selector_instance = message.get_body()
             ActorSystem().ask(selector_instance, Message(MsgType.DEVICES_REQUEST, aggregator_instance), 1)
-            """
