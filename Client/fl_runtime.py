@@ -65,6 +65,11 @@ def training():
                                            color_mode='rgb',
                                            batch_size=BATCH_SIZE)
 
+    batchX, batchY = train_it.next()
+
+    print("batchX shape: ", batchX.shape)
+    print("batchY shape: ", batchY.shape)
+
     model.fit_generator(train_it, steps_per_epoch=calculate_steps(), epochs=EPOCHS)
 
     return model

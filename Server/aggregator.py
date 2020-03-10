@@ -17,7 +17,7 @@ class AggregatorActor(Actor):
 
             print("federated aggregation")
 
-            # federated_aggregation(federated_train_data)
+            federated_aggregation(federated_train_data)
 
         elif message.get_type() == MsgType.GREETINGS:
             self.send(sender, 'Hello, World from Aggregator!')
