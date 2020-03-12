@@ -73,8 +73,13 @@ model = tf.keras.applications.mobilenet_v2.MobileNetV2()
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 model.summary()
 
-x = model.get_weights()
-y = model.get_weights()
+x = [np.full(w.shape, 0) for w in model.get_weights()]
+y = [np.full(w.shape, 1) for w in model.get_weights()]
+
+model.set_weights(custom_federated_aggregation([x, y]))
+#print("weights set")
+
+print(model.get_weights())
 
 """
 # TEST WITH RANDOM WEIGHTS
@@ -82,8 +87,4 @@ weights = [np.random.rand(*w.shape) for w in model.get_weights()]
 model.set_weights(weights)
 print("random weights set")
 """
-
-model.set_weights(custom_federated_aggregation([x, y]))
-print("weights set")
-
 # federated_aggregation(tf.keras.applications.mobilenet_v2.MobileNetV2().get_weights())
