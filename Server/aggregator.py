@@ -19,5 +19,10 @@ class AggregatorActor(Actor):
 
             federated_aggregation(federated_train_data)
 
+            """
+            DISTRIBUTE THE MODEL
+            federated_weights = tff.learning.keras_weights_from_tff_weights(state.model)
+            """
+
         elif message.get_type() == MsgType.GREETINGS:
             self.send(sender, 'Hello, World from Aggregator!')
