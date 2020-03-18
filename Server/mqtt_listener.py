@@ -1,11 +1,7 @@
 import paho.mqtt.client as mqtt
 import threading
 import json
-import numpy as np
-from numpy import array
-import tensorflow as tf
 from common import *
-import collections
 from thespian.actors import *
 
 
