@@ -111,7 +111,8 @@ def generate_validation_iterator():
         label_index = validation_y[i]
         target = np.zeros(1000)
         target[label_index - 1] = 1
-        validation_y[i] = target
+        validation_y[i] = target.tolist()
+        validation_y[i] = target.tolist()
 
     validation_sequence = [[validation_x[i], validation_y[i]] for i in range(0, len(validation_x))]
     validation_dataframe = pd.DataFrame(validation_sequence, columns = ['x', 'y'])
@@ -147,13 +148,13 @@ if __name__ == "__main__":
     # Compile the model
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-    train_it = generate_train_iterator()
     """
     VALIDATION
     """
     valid_it = generate_validation_iterator()
 
     steps = math.ceil(50000 / BATCH_SIZE)
-    model.evaluate_generator(valid_it, steps=steps)
+    print(f"evaluate model in {steps} steps")
+    model.evaluate_generator(valid_it, steps=steps, use_multiprocessing=True, verbose=1)
     # model.evaluate(x = validation_x, y = validation_y)
 
