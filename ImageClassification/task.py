@@ -107,12 +107,18 @@ def generate_validation_iterator():
         content = f.readlines()
     # you may also want to remove whitespace characters like `\n` at the end of each line
     validation_y = [int(x.strip()) for x in content]
+    """
     for i in range(len(validation_y)):
         label_index = validation_y[i]
-        target = np.zeros(1000)
+        #target = np.zeros(1000)
+        target = [0 for i in range(1000)]
         target[label_index - 1] = 1
-        validation_y[i] = target.tolist()
-        validation_y[i] = target.tolist()
+        validation_y[i] = target
+    """
+    in_classes_lists = list(in_classes.keys())
+    for i in range(len(validation_y)):
+        class_index = validation_y[i] - 1
+        validation_y[i] = in_classes_lists[class_index]
 
     validation_sequence = [[validation_x[i], validation_y[i]] for i in range(0, len(validation_x))]
     validation_dataframe = pd.DataFrame(validation_sequence, columns = ['x', 'y'])
@@ -124,7 +130,7 @@ def generate_validation_iterator():
 
     valid_it = datagen.flow_from_dataframe(
         dataframe=validation_dataframe,
-        directory=join(IMAGENET_PATH, 'ILSVRC2012_img_val'),
+        directory=join(IMAGENET_PATH, 'ILSVRC2012_img_val/val/'),
         x_col='x',
         y_col='y',
         target_size=TARGET_SIZE,
@@ -137,6 +143,7 @@ def generate_validation_iterator():
 
     print(f'Batch x shape={batchX.shape}')
     print(f'Batch y shape={batchy.shape}')
+    print('Batch y: ', len(batchy[0]), batchy[0])
 
     return valid_it
 
@@ -148,6 +155,8 @@ if __name__ == "__main__":
     # Compile the model
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
+    train_it = generate_train_iterator()
+
     """
     VALIDATION
     """
@@ -155,6 +164,7 @@ if __name__ == "__main__":
 
     steps = math.ceil(50000 / BATCH_SIZE)
     print(f"evaluate model in {steps} steps")
-    model.evaluate_generator(valid_it, steps=steps, use_multiprocessing=True, verbose=1)
-    # model.evaluate(x = validation_x, y = validation_y)
+
+    loss = model.evaluate_generator(valid_it, steps=steps, use_multiprocessing=True, verbose=1)
+    print(loss)
 
