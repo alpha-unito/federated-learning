@@ -15,7 +15,8 @@ from os.path import isfile, join
 
 import math
 
-IMAGENET_PATH = './res/ILSVRC2012'
+#IMAGENET_PATH = '/media/lore/Data/ILSVRC2012/'
+IMAGENET_PATH = './res'
 
 VALIDATION_LABELS = './res/ILSVRC2012_devkit_t12/data/ILSVRC2012_validation_ground_truth.txt'
 
@@ -46,7 +47,7 @@ def generate_train_iterator():
     # create generator
     datagen = ImageDataGenerator()
 
-    train_path = join(IMAGENET_PATH, 'ILSVRC2012_img_train/train/')
+    train_path = join(IMAGENET_PATH, 'ILSVRC2012_img_train/')
     train_it = datagen.flow_from_directory(train_path,
                                            target_size=TARGET_SIZE,
                                            class_mode='categorical',
@@ -130,7 +131,7 @@ def generate_validation_iterator():
 
     valid_it = datagen.flow_from_dataframe(
         dataframe=validation_dataframe,
-        directory=join(IMAGENET_PATH, 'ILSVRC2012_img_val/val/'),
+        directory=join(IMAGENET_PATH, 'ILSVRC2012_img_val/val'),
         x_col='x',
         y_col='y',
         target_size=TARGET_SIZE,
@@ -151,11 +152,9 @@ def generate_validation_iterator():
 if __name__ == "__main__":
 
     model = keras.applications.mobilenet_v2.MobileNetV2()
-    model.summary()
+    # model.summary()
     # Compile the model
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-    train_it = generate_train_iterator()
 
     """
     VALIDATION
@@ -165,6 +164,6 @@ if __name__ == "__main__":
     steps = math.ceil(50000 / BATCH_SIZE)
     print(f"evaluate model in {steps} steps")
 
-    loss = model.evaluate_generator(valid_it, steps=steps, use_multiprocessing=True, verbose=1)
-    print(loss)
+    score = model.evaluate_generator(valid_it, steps=steps, use_multiprocessing=True, verbose=1)
+    print("Loss: ", score[0], "Accuracy: ", score[1])
 
