@@ -7,6 +7,7 @@ from keras.preprocessing import image as image_utils
 
 from keras.preprocessing.image import ImageDataGenerator
 import keras
+from keras.callbacks import ModelCheckpoint
 
 import pandas as pd
 
@@ -15,18 +16,19 @@ from os.path import isfile, join
 
 import math
 
-#IMAGENET_PATH = '/media/lore/Data/ILSVRC2012/'
-IMAGENET_PATH = './res'
+import time
+
+IMAGENET_PATH = '/media/lore/Data/ILSVRC2012/'
 
 VALIDATION_LABELS = './res/ILSVRC2012_devkit_t12/data/ILSVRC2012_validation_ground_truth.txt'
 
-# TOTAL_IMAGES = 1300 * 1000
+# TOTAL_IMAGES = 961832
 TOTAL_IMAGES = 100
 
 TARGET_SIZE = (224, 224)
 
-BATCH_SIZE = 64
-EPOCHS = 3
+BATCH_SIZE = 32
+EPOCHS = 1
 
 print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
 
@@ -47,7 +49,7 @@ def generate_train_iterator():
     # create generator
     datagen = ImageDataGenerator()
 
-    train_path = join(IMAGENET_PATH, 'ILSVRC2012_img_train/')
+    train_path = join(IMAGENET_PATH, 'ILSVRC2012_img_train_75_100/')
     train_it = datagen.flow_from_directory(train_path,
                                            target_size=TARGET_SIZE,
                                            class_mode='categorical',
@@ -68,7 +70,7 @@ def generate_train_iterator():
 def train_iterator(model, train_it):
 
     steps = math.ceil(TOTAL_IMAGES / BATCH_SIZE)
-    model.fit_generator(train_it, steps_per_epoch=steps, epochs=EPOCHS, validation_data = validation_sequence)
+    model.fit_generator(train_it, steps_per_epoch=steps, epochs=EPOCHS)
 
 
 def generate_validation_dataset():
@@ -108,14 +110,7 @@ def generate_validation_iterator():
         content = f.readlines()
     # you may also want to remove whitespace characters like `\n` at the end of each line
     validation_y = [int(x.strip()) for x in content]
-    """
-    for i in range(len(validation_y)):
-        label_index = validation_y[i]
-        #target = np.zeros(1000)
-        target = [0 for i in range(1000)]
-        target[label_index - 1] = 1
-        validation_y[i] = target
-    """
+
     in_classes_lists = list(in_classes.keys())
     for i in range(len(validation_y)):
         class_index = validation_y[i] - 1
@@ -152,18 +147,45 @@ def generate_validation_iterator():
 if __name__ == "__main__":
 
     model = keras.applications.mobilenet_v2.MobileNetV2()
-    # model.summary()
+    model.summary()
+
     # Compile the model
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
+    #filepath = "MobileNetV2-75-100-{epoch:02d}-{val_accuracy:.2f}.hdf5"
+    filepath = "MobileNetV2-75-100-{epoch:02d}.hdf5"
+    checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=False, mode='auto', period=1)
+
+    """
+    TRAIN
+    """
+    ts = time.time()
+
+    train_it = generate_train_iterator()
+
+    te = time.time()
+
+    print(f"Train iterator finished in {te - ts} seconds ({(te - ts) / 60} minutes)")
+    
+    ts = time.time()
+
+    steps = math.ceil(TOTAL_IMAGES / BATCH_SIZE)
+    model.fit_generator(train_it, steps_per_epoch=steps, epochs=EPOCHS, use_multiprocessing=True, callbacks=[checkpoint])
+
+    te = time.time()
+
+    print(f"Epoch of train iterator finished in {te - ts} seconds ({(te - ts) / 60} minutes)")
+
+    '''
     """
     VALIDATION
     """
+
     valid_it = generate_validation_iterator()
 
     steps = math.ceil(50000 / BATCH_SIZE)
     print(f"evaluate model in {steps} steps")
 
-    score = model.evaluate_generator(valid_it, steps=steps, use_multiprocessing=True, verbose=1)
+    score = model.evaluate_generator(valid_it, steps=steps, use_multiprocessing=True, verbose=1, callbacks=[checkpoint])
     print("Loss: ", score[0], "Accuracy: ", score[1])
-
+    '''
