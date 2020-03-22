@@ -6,7 +6,7 @@ import random
 from datetime import datetime
 import math
 
-TEST_PATH = '/media/lore/Data/ILSVRC2012/ILSVRC2012_img_train/'
+TEST_PATH = '/media/lore/6B6223601B584A05/IMAGENET/ILSVRC2012_img_train'
 TOTAL_CLASSES = 1000
 
 def generate_random_test_subset(path: str, images_percentage, destination_path) -> dict:
@@ -31,12 +31,12 @@ def generate_random_test_subset(path: str, images_percentage, destination_path) 
         os.mkdir(destination_sub_path)
         
         for j in range(images_number):
-            pass
+            #pass
             #print(f"    - Copying image number {j}: {images_list[j]}")
             move(join(source_sub_path, images_list[j]), destination_sub_path) # source, destination                
     
 
-base_destination_path = '/media/lore/Data/ILSVRC2012/'
+base_destination_path = '//media/lore/6B6223601B584A05/IMAGENET/ILSVRC2012_img_train_25_100'
 new_directory = join(base_destination_path, str(int(datetime.now().timestamp())))
 
 try:

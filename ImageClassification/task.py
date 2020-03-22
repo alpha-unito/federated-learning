@@ -18,12 +18,20 @@ import math
 
 import time
 
-IMAGENET_PATH = '/media/lore/Data/ILSVRC2012/'
+from tensorflow.compat.v1 import ConfigProto
+from tensorflow.compat.v1 import InteractiveSession
+
+config = ConfigProto()
+config.gpu_options.allow_growth = True
+session = InteractiveSession(config=config)
+
+#IMAGENET_PATH = './res/'
+IMAGENET_PATH = '/media/lore/B6C8D9F4C8D9B33B/Users/lorym/Downloads'
 
 VALIDATION_LABELS = './res/ILSVRC2012_devkit_t12/data/ILSVRC2012_validation_ground_truth.txt'
 
-# TOTAL_IMAGES = 961832
-TOTAL_IMAGES = 100
+TOTAL_IMAGES = 961832
+#TOTAL_IMAGES = 100
 
 TARGET_SIZE = (224, 224)
 
@@ -31,7 +39,11 @@ BATCH_SIZE = 32
 EPOCHS = 1
 
 print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
-
+try: 
+    tf.config.experimental.set_memory_growth(physical_devices[0], True) 
+except: 
+    print("Invalid device or cannot modify virtual devices once initialized. ")
+    pass 
 """
 # NB:
 def predict(model, x_val):
@@ -49,7 +61,8 @@ def generate_train_iterator():
     # create generator
     datagen = ImageDataGenerator()
 
-    train_path = join(IMAGENET_PATH, 'ILSVRC2012_img_train_75_100/')
+    #train_path = join(IMAGENET_PATH, 'ILSVRC2012_img_train_75_100/')
+    train_path = join(IMAGENET_PATH, 'ILSVRC2012_img_train/')
     train_it = datagen.flow_from_directory(train_path,
                                            target_size=TARGET_SIZE,
                                            class_mode='categorical',
@@ -65,12 +78,6 @@ def generate_train_iterator():
     print('Batch y: ',len(batchy[0]), batchy[0])
 
     return train_it
-
-
-def train_iterator(model, train_it):
-
-    steps = math.ceil(TOTAL_IMAGES / BATCH_SIZE)
-    model.fit_generator(train_it, steps_per_epoch=steps, epochs=EPOCHS)
 
 
 def generate_validation_dataset():
