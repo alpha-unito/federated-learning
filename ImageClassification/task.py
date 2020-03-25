@@ -7,7 +7,7 @@ from keras.preprocessing import image as image_utils
 
 from keras.preprocessing.image import ImageDataGenerator
 import keras
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint, CSVLogger
 
 import pandas as pd
 
@@ -26,12 +26,12 @@ config.gpu_options.allow_growth = True
 session = InteractiveSession(config=config)
 
 #IMAGENET_PATH = './res/'
-IMAGENET_PATH = '/media/lore/B6C8D9F4C8D9B33B/Users/lorym/Downloads'
+IMAGENET_PATH = '/media/lore/B6C8D9F4C8D9B33B/Users/lorym/Downloads/IMAGENET'
 
-VALIDATION_LABELS = './res/ILSVRC2012_devkit_t12/data/ILSVRC2012_validation_ground_truth.txt'
+VALIDATION_LABELS = '../..//res/ILSVRC2012_devkit_t12/data/ILSVRC2012_validation_ground_truth.txt'
 
-TOTAL_IMAGES = 961832
-#TOTAL_IMAGES = 100
+#TOTAL_IMAGES = 961832
+TOTAL_IMAGES = 100
 
 TARGET_SIZE = (224, 224)
 
@@ -61,8 +61,8 @@ def generate_train_iterator():
     # create generator
     datagen = ImageDataGenerator()
 
-    #train_path = join(IMAGENET_PATH, 'ILSVRC2012_img_train_75_100/')
-    train_path = join(IMAGENET_PATH, 'ILSVRC2012_img_train/')
+    #train_path = join(IMAGENET_PATH, 'ILSVRC2012_img_train/')
+    train_path = join(IMAGENET_PATH, 'ILSVRC2012_img_train_75_100/')
     train_it = datagen.flow_from_directory(train_path,
                                            target_size=TARGET_SIZE,
                                            class_mode='categorical',
@@ -151,33 +151,73 @@ def generate_validation_iterator():
     return valid_it
 
 
+def get_last_weights(path):
+    weights = [join(path, f) for f in listdir(path)
+               if isfile(join(path, f)) and 'Weights' in f]
+
+    weights.sort(reverse=True)
+
+    return weights
+
+
+class CustomModelCheckpointCallback(tf.keras.callbacks.Callback):
+
+    def __init__(self, starting_epoch = 0, path = './snapshots/'):
+        self.starting_epoch = starting_epoch
+        self.path = path
+
+    def on_epoch_end(self, epoch, logs=None):
+        path = "Weights-MobileNetV2-75-100-{epoch:02d}.hdf5".format(epoch = epoch + 1 + self.starting_epoch)
+        print(f"Saving model \"{path}\"")
+        self.model.save_weights(path)
+
+    """
+    def on_test_batch_end(self, batch, logs=None):
+        print('Evaluating: batch {} ends at {}'.format(batch, datetime.datetime.now().time()))
+    """
+
 if __name__ == "__main__":
 
     model = keras.applications.mobilenet_v2.MobileNetV2()
     model.summary()
 
+    weights = get_last_weights('./snapshots')
+
+    if len(weights) > 0:
+        print(f"Loading Weights from {weights[0]} ...")
+        model.load_weights(weights[0])
+        print("Done.\n")
+
     # Compile the model
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
+    """
     #filepath = "MobileNetV2-75-100-{epoch:02d}-{val_accuracy:.2f}.hdf5"
-    filepath = "MobileNetV2-75-100-{epoch:02d}.hdf5"
+    filepath = "snapshots/Weights-MobileNetV2-75-100-{(7 + epoch):02d}.hdf5"
     checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=False, mode='auto', period=1)
+    """
+
+    checkpoint = CustomModelCheckpointCallback(starting_epoch=114)
+
+    csv_logger = CSVLogger(f'snapshots/log.csv', append=True, separator=';')
 
     """
     TRAIN
     """
+    print(f"Generating train iterator from {join(IMAGENET_PATH, 'ILSVRC2012_img_train_75_100/')} ...")
     ts = time.time()
 
     train_it = generate_train_iterator()
 
     te = time.time()
 
-    print(f"Train iterator finished in {te - ts} seconds ({(te - ts) / 60} minutes)")
-    
+    print(f"Train iterator finished in {te - ts} seconds ({(te - ts) / 60} minutes)\n")
+
+    print(f"Starting training ...")
     ts = time.time()
 
     steps = math.ceil(TOTAL_IMAGES / BATCH_SIZE)
-    model.fit_generator(train_it, steps_per_epoch=steps, epochs=EPOCHS, use_multiprocessing=True, callbacks=[checkpoint])
+    model.fit_generator(train_it, steps_per_epoch=steps, epochs=EPOCHS, use_multiprocessing=True, callbacks=[checkpoint, csv_logger])
 
     te = time.time()
 
