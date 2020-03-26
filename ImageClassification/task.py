@@ -31,8 +31,8 @@ IMAGENET_PATH = '/media/lore/B6C8D9F4C8D9B33B/Users/lorym/Downloads/IMAGENET'
 
 VALIDATION_LABELS = '../..//res/ILSVRC2012_devkit_t12/data/ILSVRC2012_validation_ground_truth.txt'
 
-#TOTAL_IMAGES = 961832
-TOTAL_IMAGES = 100
+TOTAL_VAL_IMAGES = 50000
+TOTAL_TRAIN_IMAGES = 961832
 
 TARGET_SIZE = (224, 224)
 
@@ -180,7 +180,7 @@ class CustomModelCheckpointCallback(tf.keras.callbacks.Callback):
             if current_epoch == 1:
                 fd.write("epoch;accuracy;loss;validation_accuracy;validation_loss\n")
 
-            fd.write(f"{current_epoch};{logs['accuracy']};{logs['loss']};{logs.get('val_acc', '')};{logs.get('val_loss', '')}\n")
+            fd.write(f"{current_epoch};{logs['accuracy']};{logs['loss']};{logs.get('val_accuracy', '')};{logs.get('val_loss', '')}\n")
 
     """
     def on_test_batch_end(self, batch, logs=None):
@@ -222,11 +222,23 @@ if __name__ == "__main__":
 
     print(f"Train iterator finished in {te - ts} seconds ({(te - ts) / 60} minutes)\n")
 
+    print(f"Generating train iterator from {join(IMAGENET_PATH, 'ILSVRC2012_img_train_75_100/')} ...")
+    ts = time.time()
+
+    valid_it = generate_validation_iterator()
+
+    te = time.time()
+
+    print(f"Train iterator finished in {te - ts} seconds ({(te - ts) / 60} minutes)\n")
+
     print(f"Starting training ...")
     ts = time.time()
 
-    steps = math.ceil(TOTAL_IMAGES / BATCH_SIZE)
-    model.fit_generator(train_it, steps_per_epoch=steps, epochs=EPOCHS, use_multiprocessing=True, callbacks=[checkpoint])
+    train_steps = math.ceil(TOTAL_TRAIN_IMAGES / BATCH_SIZE)
+    val_steps = math.ceil(TOTAL_VAL_IMAGES / BATCH_SIZE)
+
+    # model.fit_generator(train_it, steps_per_epoch=steps, epochs=EPOCHS, use_multiprocessing=True, callbacks=[checkpoint])
+    model.fit_generator(train_it, steps_per_epoch=train_steps, validation_data=valid_it, validation_steps = val_steps, epochs=EPOCHS, use_multiprocessing=True, callbacks=[checkpoint])
 
     te = time.time()
 
