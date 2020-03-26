@@ -17,6 +17,7 @@ from os.path import isfile, join
 import math
 
 import time
+import re
 
 from tensorflow.compat.v1 import ConfigProto
 from tensorflow.compat.v1 import InteractiveSession
@@ -167,9 +168,19 @@ class CustomModelCheckpointCallback(tf.keras.callbacks.Callback):
         self.path = path
 
     def on_epoch_end(self, epoch, logs=None):
-        path = "Weights-MobileNetV2-75-100-{epoch:02d}.hdf5".format(epoch = epoch + 1 + self.starting_epoch)
+        print("logs: ", logs)
+        current_epoch = epoch + 1 + self.starting_epoch
+
+        path = self.path + "Weights-MobileNetV2-75-100-{epoch:02d}.hdf5".format(epoch = current_epoch)
         print(f"Saving model \"{path}\"")
         self.model.save_weights(path)
+
+        #log
+        with open(self.path + 'log.csv', 'a') as fd:
+            if current_epoch == 1:
+                fd.write("epoch;accuracy;loss;validation_accuracy;validation_loss\n")
+
+            fd.write(f"{current_epoch};{logs['accuracy']};{logs['loss']};{logs.get('val_acc', '')};{logs.get('val_loss', '')}\n")
 
     """
     def on_test_batch_end(self, batch, logs=None):
@@ -182,24 +193,22 @@ if __name__ == "__main__":
     model.summary()
 
     weights = get_last_weights('./snapshots')
+    last_epoch = 0
 
     if len(weights) > 0:
         print(f"Loading Weights from {weights[0]} ...")
         model.load_weights(weights[0])
         print("Done.\n")
 
+        # get last epoch number
+        p = re.compile("-(\w+).hdf5")
+        result = p.search(weights[0])
+        last_epoch = int(result.group(1))
+
     # Compile the model
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-    """
-    #filepath = "MobileNetV2-75-100-{epoch:02d}-{val_accuracy:.2f}.hdf5"
-    filepath = "snapshots/Weights-MobileNetV2-75-100-{(7 + epoch):02d}.hdf5"
-    checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=False, mode='auto', period=1)
-    """
-
-    checkpoint = CustomModelCheckpointCallback(starting_epoch=114)
-
-    csv_logger = CSVLogger(f'snapshots/log.csv', append=True, separator=';')
+    checkpoint = CustomModelCheckpointCallback(starting_epoch=last_epoch)
 
     """
     TRAIN
@@ -217,7 +226,7 @@ if __name__ == "__main__":
     ts = time.time()
 
     steps = math.ceil(TOTAL_IMAGES / BATCH_SIZE)
-    model.fit_generator(train_it, steps_per_epoch=steps, epochs=EPOCHS, use_multiprocessing=True, callbacks=[checkpoint, csv_logger])
+    model.fit_generator(train_it, steps_per_epoch=steps, epochs=EPOCHS, use_multiprocessing=True, callbacks=[checkpoint])
 
     te = time.time()
 
