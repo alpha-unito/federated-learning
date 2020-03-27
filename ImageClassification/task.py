@@ -37,7 +37,7 @@ TOTAL_TRAIN_IMAGES = 961832
 TARGET_SIZE = (224, 224)
 
 BATCH_SIZE = 32
-EPOCHS = 1
+EPOCHS = 40
 
 print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
 try: 
@@ -112,17 +112,13 @@ def generate_validation_iterator():
     validation_images_path = join(IMAGENET_PATH, 'ILSVRC2012_img_val/val/')
     validation_x = [f for f in listdir(validation_images_path)
                     if isfile(join(validation_images_path, f))]
+    validation_x.sort()
 
     # LABELS
     with open(VALIDATION_LABELS) as f:
         content = f.readlines()
     # you may also want to remove whitespace characters like `\n` at the end of each line
-    validation_y = [int(x.strip()) for x in content]
-
-    in_classes_lists = list(in_classes.keys())
-    for i in range(len(validation_y)):
-        class_index = validation_y[i] - 1
-        validation_y[i] = in_classes_lists[class_index]
+    validation_y = [in_classes[int(x.strip())][0] for x in content]
 
     validation_sequence = [[validation_x[i], validation_y[i]] for i in range(0, len(validation_x))]
     validation_dataframe = pd.DataFrame(validation_sequence, columns = ['x', 'y'])
@@ -211,49 +207,49 @@ if __name__ == "__main__":
     checkpoint = CustomModelCheckpointCallback(starting_epoch=last_epoch)
 
     """
-    TRAIN
+    TRAIN ITERATOR
     """
     print(f"Generating train iterator from {join(IMAGENET_PATH, 'ILSVRC2012_img_train_75_100/')} ...")
     ts = time.time()
 
     train_it = generate_train_iterator()
+    train_steps = math.ceil(TOTAL_TRAIN_IMAGES / BATCH_SIZE)
 
     te = time.time()
 
     print(f"Train iterator finished in {te - ts} seconds ({(te - ts) / 60} minutes)\n")
 
+    """
+    VALIDATION ITERATOR
+    """
     print(f"Generating train iterator from {join(IMAGENET_PATH, 'ILSVRC2012_img_train_75_100/')} ...")
     ts = time.time()
 
     valid_it = generate_validation_iterator()
+    val_steps = math.ceil(TOTAL_VAL_IMAGES / BATCH_SIZE)
 
     te = time.time()
 
     print(f"Train iterator finished in {te - ts} seconds ({(te - ts) / 60} minutes)\n")
 
+    """
+    FIT
+    """
     print(f"Starting training ...")
     ts = time.time()
 
-    train_steps = math.ceil(TOTAL_TRAIN_IMAGES / BATCH_SIZE)
-    val_steps = math.ceil(TOTAL_VAL_IMAGES / BATCH_SIZE)
-
     # model.fit_generator(train_it, steps_per_epoch=steps, epochs=EPOCHS, use_multiprocessing=True, callbacks=[checkpoint])
-    model.fit_generator(train_it, steps_per_epoch=train_steps, validation_data=valid_it, validation_steps = val_steps, epochs=EPOCHS, use_multiprocessing=True, callbacks=[checkpoint])
+    model.fit_generator(train_it, steps_per_epoch=train_steps, validation_data=valid_it, validation_steps = val_steps, epochs=EPOCHS - last_epoch, use_multiprocessing=True, callbacks=[checkpoint])
 
     te = time.time()
 
     print(f"Epoch of train iterator finished in {te - ts} seconds ({(te - ts) / 60} minutes)")
 
-    '''
     """
     VALIDATION
     """
 
-    valid_it = generate_validation_iterator()
+    print(f"evaluate model in {val_steps} steps")
 
-    steps = math.ceil(50000 / BATCH_SIZE)
-    print(f"evaluate model in {steps} steps")
-
-    score = model.evaluate_generator(valid_it, steps=steps, use_multiprocessing=True, verbose=1, callbacks=[checkpoint])
+    score = model.evaluate_generator(valid_it, steps=val_steps, use_multiprocessing=True, verbose=1, callbacks=[checkpoint])
     print("Loss: ", score[0], "Accuracy: ", score[1])
-    '''
