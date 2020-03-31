@@ -33,6 +33,7 @@ VALIDATION_LABELS = '../..//res/ILSVRC2012_devkit_t12/data/ILSVRC2012_validation
 
 TOTAL_VAL_IMAGES = 50000
 TOTAL_TRAIN_IMAGES = 961832
+#TOTAL_TRAIN_IMAGES =320336
 
 TARGET_SIZE = (224, 224)
 
@@ -185,7 +186,7 @@ class CustomModelCheckpointCallback(tf.keras.callbacks.Callback):
 
 if __name__ == "__main__":
 
-    model = keras.applications.mobilenet_v2.MobileNetV2()
+    model = keras.applications.mobilenet_v2.MobileNetV2(weights = None)
     model.summary()
 
     weights = get_last_weights('./snapshots')
@@ -222,7 +223,7 @@ if __name__ == "__main__":
     """
     VALIDATION ITERATOR
     """
-    print(f"Generating train iterator from {join(IMAGENET_PATH, 'ILSVRC2012_img_train_75_100/')} ...")
+    print(f"Generating train iterator from {join(IMAGENET_PATH, 'ILSVRC2012_img_val/val/')} ...")
     ts = time.time()
 
     valid_it = generate_validation_iterator()
@@ -251,5 +252,5 @@ if __name__ == "__main__":
 
     print(f"evaluate model in {val_steps} steps")
 
-    score = model.evaluate_generator(valid_it, steps=val_steps, use_multiprocessing=True, verbose=1, callbacks=[checkpoint])
+    score = model.evaluate_generator(val_it, steps=val_steps, use_multiprocessing=True, verbose=1, callbacks=[checkpoint])
     print("Loss: ", score[0], "Accuracy: ", score[1])
