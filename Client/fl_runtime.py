@@ -6,6 +6,12 @@ import keras
 from keras.preprocessing.image import ImageDataGenerator
 from json import JSONEncoder
 import numpy
+from mqtt_listener import MqttListener
+
+
+MQTT_URL = 'localhost'
+MQTT_PORT = 1883
+
 
 IMAGENET_PATH = '/media/lore/6B6223601B584A05/IMAGENET/'
 TOTAL_IMAGES = 100
@@ -13,7 +19,13 @@ TARGET_SIZE = (224, 224)
 BATCH_SIZE = 20
 EPOCHS = 1
 
+
 model = keras.applications.mobilenet_v2.MobileNetV2()
+
+
+# MQTT init for model update
+self.properties = {'model': model}
+mqtt_listener = MqttListener(MQTT_URL, MQTT_PORT, self.properties)
 
 
 # -------- MQTT UTILS -----------------------
@@ -23,19 +35,17 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe("topic/fl-broadcast")
 
 def on_message(client, userdata, msg):
-    print("received")
-    if msg.payload.decode() == "Hello world!":
-        print("Yes!")
-        client.disconnect()
+    pass
 
 # MQTT CLIENT CONNECTION TO MESSAGE BROKER
 client = mqtt.Client()
-client.connect("localhost", 1883, 60)
+client.connect(MQTT_URL, MQTT_PORT, 60)
 
 client.on_connect = on_connect
 client.on_message = on_message
 
 # -------- END MQTT UTILS ------------------
+
 
 def calculate_steps():
     steps = 1
@@ -86,7 +96,6 @@ def device_connection_to_server():
 
     # select training data related to selected clients
     model_weights = model.get_weights()
-    # print(model_weights)
 
     # build message object
     send_msg = {

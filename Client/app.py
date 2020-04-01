@@ -4,6 +4,7 @@ import time
 client_id = int(time.time())
 
 if __name__ == "__main__":
+    
     while True:
         print(f"[CLIENT {client_id}]")
         print(" - Insert 1 for start learning task")
