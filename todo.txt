@@ -1,0 +1,20 @@
+COSE DA FARE PER FAR PARTIRE UN CLIENT:
+
+1) connessione ssh alla macchina virtuale
+    ssh -i /home/lore/Scaricati/TestEc2TFF.pem ubuntu@ec2-52-51-247-235.eu-west-1.compute.amazonaws.com
+
+2) copia dei file richiesti tramite sync
+    rsync -av --progress -e "ssh -i /home/lore/Scaricati/TestEc2TFF.pem" /home/lore/Projects/test_server/ ubuntu@ec2-52-51-247-235.eu-west-1.compute.amazonaws.com:/home/ubuntu/test_server
+
+3) import dell'ambiente conda
+    bash Anaconda3-2020.02-Linux-x86_64.sh
+    source .bashrc
+    conda env create -f tff_env.yml
+
+4) activate environment
+    conda activate tff
+
+5) lancio di un nuovo client eseguendo lo script in maniera indipente
+    (local) nohup python -u ./counter.py > local.log &
+    ssh -i /home/lore/Scaricati/TestEc2TFF.pem ubuntu@ec2-52-51-247-235.eu-west-1.compute.amazonaws.com "nohup python3 -u /home/ubuntu/test_server/counter.py > /home/ubuntu/test_server/log.txt &"
+

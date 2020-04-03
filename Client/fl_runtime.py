@@ -13,7 +13,7 @@ MQTT_URL = 'localhost'
 MQTT_PORT = 1883
 
 
-IMAGENET_PATH = '/media/lore/6B6223601B584A05/IMAGENET/'
+IMAGENET_PATH = './res/'
 TOTAL_IMAGES = 100
 TARGET_SIZE = (224, 224)
 BATCH_SIZE = 20
@@ -68,7 +68,7 @@ def training():
     datagen = ImageDataGenerator()
 
     # prepare an iterators for each dataset
-    train_path = "../res/train"
+    train_path = "./res"
     train_it = datagen.flow_from_directory(train_path,
                                            target_size=TARGET_SIZE,
                                            class_mode='categorical',
