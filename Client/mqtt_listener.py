@@ -1,8 +1,6 @@
 import paho.mqtt.client as mqtt
 import threading
 import json
-from common import *
-from thespian.actors import *
 
 
 class MqttListener():

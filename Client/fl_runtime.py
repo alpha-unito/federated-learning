@@ -24,8 +24,8 @@ model = keras.applications.mobilenet_v2.MobileNetV2()
 
 
 # MQTT init for model update
-self.properties = {'model': model}
-mqtt_listener = MqttListener(MQTT_URL, MQTT_PORT, self.properties)
+properties = {'model': model}
+mqtt_listener = MqttListener(MQTT_URL, MQTT_PORT, properties)
 
 
 # -------- MQTT UTILS -----------------------
