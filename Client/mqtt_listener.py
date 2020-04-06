@@ -20,12 +20,12 @@ class MqttListener():
             
             print(f"Loading Weights from message ...")
             
-            userdata['model'].load_weights(weights)
+            userdata['model'].set_weights(weights)
             
             print("Model weights updated successfully.\n")
 
-        except:
-            print('Error updating model.')
+        except Exception as e:
+            print('Error updating model:', e)
     
 
     @staticmethod
