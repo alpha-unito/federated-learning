@@ -7,8 +7,8 @@ class MqttListener():
     
     @staticmethod
     def on_connect(client, userdata, flags, rc):
-        print("\nConnected with result code {code}\n".format(code = rc))
-        client.subscribe("topic/fl-update")
+        print("\nConnected with result code {code} to topic 'topic/fl-update' \n".format(code = rc))
+        print('subscribe', client.subscribe("topic/fl-update"))
 
 
     @staticmethod
@@ -37,6 +37,8 @@ class MqttListener():
 
 
     def __init__(self, url: str, port: int, collector: dict, keep_alive: int = 60):
+        print('Init client update MQTT listener', url, port, collector)
+
         # MQTT CLIENT CONNECTION TO MESSAGE BROKER
         client = mqtt.Client(userdata = collector)
         
@@ -49,5 +51,6 @@ class MqttListener():
         thr = threading.Thread(target = self.mqtt_listener, args = [client])
         try:
             thr.start() # Will run thread
+            print('thread started')
         except:
             print('error on thread')

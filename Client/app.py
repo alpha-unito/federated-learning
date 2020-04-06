@@ -5,6 +5,8 @@ client_id = int(time.time())
 
 if __name__ == "__main__":
     
+    task = fl_runtime.FederatedTask()
+
     while True:
         print(f"[CLIENT {client_id}]")
         print(" - Insert 1 for start learning task")
@@ -13,8 +15,8 @@ if __name__ == "__main__":
         choice = input()
 
         if choice == '1':
-            fl_runtime.training()
+            task.training()
         elif choice == '2':
-            fl_runtime.device_connection_to_server()
+            task.device_connection_to_server()
         else:
             print("Invalid option.\n")

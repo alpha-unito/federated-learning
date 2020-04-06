@@ -19,17 +19,6 @@ class AggregatorActor(Actor):
                 return obj.tolist()
             return JSONEncoder.default(self, obj)
 
-    # -------- MQTT UTILS -----------------------
-
-    def on_connect(client, userdata, flags, rc):
-        print(f"Aggregator connected with result code {rc}")
-        client.subscribe("topic/fl-update")
-
-    def on_message(client, userdata, msg):
-        pass
-    # -------- END MQTT UTILS ------------------
-
-
     def receiveMessage(self, message, sender):
         print('aggregator receive message')
 
@@ -47,18 +36,22 @@ class AggregatorActor(Actor):
             DISTRIBUTE THE MODEL
             """
             # publishes on MQTT topic
-            self.client.publish("topic/fl-broadcast", json.dumps(averaged_weights, cls=self.NumpyArrayEncoder));
+            self.client.publish("topic/fl-update", json.dumps(averaged_weights, cls=self.NumpyArrayEncoder));
+
+            print("\npublished update to 'topic/fl-update'")
 
         elif message.get_type() == MsgType.GREETINGS:
             self.send(sender, 'Hello, World from Aggregator!')
 
 
+    def on_connect(client, userdata, flags, rc):
+            print(f"Connected with result code {rc}")
+            client.subscribe("topic/fl-broadcast")
+
     def __init__(self, keep_alive: int = 60):
         # MQTT CLIENT CONNECTION TO MESSAGE BROKER
         collector = {}
         self.client = mqtt.Client(userdata = collector)
-        
-        self.client.connect(MQTT_URL, MQTT_PORT, keep_alive)
-
+        self.client.connect(MQTT_URL, MQTT_PORT, 60)
         self.client.on_connect = self.on_connect
-        self.client.on_message = self.on_message
+        
