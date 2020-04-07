@@ -29,7 +29,7 @@ class AggregatorActor(Actor):
             
             federated_train_data = [device.get_dataset() for device in devices]
 
-            print("federated aggregation")
+            print(f"federated aggregation on {len(federated_train_data)} devices.")
 
             averaged_weights = federated_aggregation(federated_train_data)
 

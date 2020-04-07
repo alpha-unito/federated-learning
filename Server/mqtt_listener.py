@@ -22,19 +22,21 @@ class MqttListener():
         except:
             print('Unsupported Device X')
 
-        for i in range(len(userdata['connected_devices'])):
+        i = 0
+        while i < len(userdata['connected_devices']):
             # replace with new weights
             if userdata['connected_devices'][i].get_id() == new_device.get_id():
                 print("Device already present, replacing ...")
                 userdata['connected_devices'][i] = new_device
-                
-            break
+                break
+            i+=1
         
         # append new device
         if i == len(userdata['connected_devices']):
             print("Adding new device ...")
             userdata['connected_devices'].append(new_device)
-    
+
+        print("Done.")
 
     @staticmethod
     def on_subscribe(client, userdata, mid, granted_qos):
@@ -72,9 +74,13 @@ class MqttListener():
         client.on_subscribe = self.on_subscribe
         client.on_message = self.on_message
         
+        client.loop_start()
+
+        """
         # START NEW THREAD WITH MQTT LISTENER
         thr = threading.Thread(target = self.mqtt_listener, args = [client])
         try:
             thr.start() # Will run thread
         except:
             print('error on thread')
+        """

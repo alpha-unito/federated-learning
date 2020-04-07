@@ -61,10 +61,15 @@ class MqttListener():
         client.on_connect = self.on_connect
         client.on_subscribe = self.on_subscribe
         client.on_message = self.on_message
+
+        client.start_loop()
         
+        """
         # START NEW THREAD WITH MQTT LISTENER
         thr = threading.Thread(target = self.mqtt_listener, args = [client])
         try:
             thr.start() # Will run thread
         except:
             print('error on thread')
+        """
+        
