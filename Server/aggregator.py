@@ -14,11 +14,13 @@ MQTT_PORT = 1883
 
 class AggregatorActor(Actor):
 
+
     class NumpyArrayEncoder(JSONEncoder):
         def default(self, obj):
             if isinstance(obj, np.ndarray):
                 return obj.tolist()
             return JSONEncoder.default(self, obj)
+
 
     def receiveMessage(self, message, sender):
         print('aggregator receive message')
@@ -37,9 +39,18 @@ class AggregatorActor(Actor):
             DISTRIBUTE THE MODEL
             """
             # publishes on MQTT topic
-            self.client.publish("topic/fl-update", json.dumps(averaged_weights, cls=self.NumpyArrayEncoder), qos=1);
+            publication = self.client.publish("topic/fl-update", json.dumps(averaged_weights, cls=self.NumpyArrayEncoder), qos=1)
+            mid = publication[1]
+            print(f"Result code: {publication[0]}")
+            print(f"Request to send mid: {mid}")
+
+            while publication[0] != 0:
+                self.client.connect(MQTT_URL, MQTT_PORT, 60)
+                publication = self.client.publish("topic/fl-update", json.dumps(averaged_weights, cls=self.NumpyArrayEncoder), qos=1)
+                print(f"Result code: {publication[0]}")
 
             print("\npublished update to 'topic/fl-update'")
+
 
         elif message.get_type() == MsgType.GREETINGS:
             self.send(sender, 'Hello, World from Aggregator!')

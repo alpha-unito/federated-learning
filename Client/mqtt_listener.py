@@ -40,14 +40,7 @@ class MqttListener():
             print("Retrying ...")
             time.sleep(1)
             self.client.connect(MQTT_URL, MQTT_PORT, 60)
-
-
-    @staticmethod
-    def mqtt_listener(client):
-        print("Start listening on MQTT channel ...")
-        client.loop_forever()
-        print("End listening on MQTT channel.")
-    
+  
 
 
     def __init__(self, url: str, port: int, collector: dict, keep_alive: int = 60):
@@ -62,14 +55,6 @@ class MqttListener():
         client.on_subscribe = self.on_subscribe
         client.on_message = self.on_message
 
-        client.start_loop()
-        
-        """
-        # START NEW THREAD WITH MQTT LISTENER
-        thr = threading.Thread(target = self.mqtt_listener, args = [client])
-        try:
-            thr.start() # Will run thread
-        except:
-            print('error on thread')
-        """
+        client.loop_start()
+
         

@@ -9,6 +9,8 @@ import numpy
 from mqtt_listener import MqttListener
 import math
 
+import time
+
 MQTT_URL = 'localhost'
 MQTT_PORT = 1883
 
@@ -68,12 +70,20 @@ class FederatedTask():
         }
 
         # publishes on MQTT topic
-        self.client.publish("topic/fl-broadcast", json.dumps(send_msg, cls=self.NumpyArrayEncoder), qos=1);
+        publication = self.client.publish("topic/fl-broadcast", json.dumps(send_msg, cls=self.NumpyArrayEncoder), qos=1);
+        mid = publication[1]
+        print(f"Result code: {publication[0]}")
+        print(f"Request to send mid: {mid}")
+
+        while publication[0] != 0:
+            self.client.connect(MQTT_URL, MQTT_PORT, 60)
+            publication = self.client.publish("topic/fl-broadcast", json.dumps(send_msg, cls=self.NumpyArrayEncoder), qos=1);
+            print(f"Result code: {publication[0]}")
 
 
-    @staticmethod
     def on_publish(client, userdata, mid):
-        print("\npublished message to 'topic/fl-broadcast'")
+        print(f"\npublished message to 'topic/fl-broadcast' with mid: {mid}")
+        userdata['acks'].append(mid)
 
 
     @staticmethod
@@ -98,8 +108,9 @@ class FederatedTask():
         self.client.on_connect = self.on_connect
         self.client.on_publish = self.on_publish
 
+        self.acks = []
 
         # MQTT init for model update
-        properties = {'model': self.model}
+        properties = {'model': self.model, 'acks': self.acks}
         self.mqtt_listener = MqttListener(MQTT_URL, MQTT_PORT, properties)
 
