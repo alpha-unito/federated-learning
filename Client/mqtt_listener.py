@@ -4,11 +4,6 @@ import json
 
 
 class MqttListener():
-    
-    @staticmethod
-    def on_connect(client, userdata, flags, rc):
-        print("\nConnected with result code {code} to topic 'topic/fl-update' \n".format(code = rc))
-        print('subscribe', client.subscribe("topic/fl-update"))
 
 
     @staticmethod
@@ -26,7 +21,26 @@ class MqttListener():
 
         except Exception as e:
             print('Error updating model:', e)
+
+
+    @staticmethod
+    def on_subscribe(client, userdata, mid, granted_qos):
+        print("Subscribed to topic/fl-update")
     
+
+    @staticmethod
+    def on_connect(client, userdata, flags, rc):
+        if rc == 0:
+            print("Connected to broker")
+            client.subscribe("topic/fl-update")
+
+        else:    
+            print("Connection failed")
+            
+            print("Retrying ...")
+            time.sleep(1)
+            self.client.connect(MQTT_URL, MQTT_PORT, 60)
+
 
     @staticmethod
     def mqtt_listener(client):
@@ -45,12 +59,12 @@ class MqttListener():
         client.connect(url, port, keep_alive)
 
         client.on_connect = self.on_connect
+        client.on_subscribe = self.on_subscribe
         client.on_message = self.on_message
         
         # START NEW THREAD WITH MQTT LISTENER
         thr = threading.Thread(target = self.mqtt_listener, args = [client])
         try:
             thr.start() # Will run thread
-            print('thread started')
         except:
             print('error on thread')

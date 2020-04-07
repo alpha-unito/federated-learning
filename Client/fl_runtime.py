@@ -68,15 +68,26 @@ class FederatedTask():
         }
 
         # publishes on MQTT topic
-        self.client.publish("topic/fl-broadcast", json.dumps(send_msg, cls=self.NumpyArrayEncoder));
-        
+        self.client.publish("topic/fl-broadcast", json.dumps(send_msg, cls=self.NumpyArrayEncoder), qos=1);
+
+
+    @staticmethod
+    def on_publish(client, userdata, mid):
         print("\npublished message to 'topic/fl-broadcast'")
 
 
     @staticmethod
     def on_connect(client, userdata, flags, rc):
-        print(f"Connected with result code {rc} to topic/fl-broadcast")
-        client.subscribe("topic/fl-broadcast")
+        if rc == 0:
+            print("Connected to broker")
+            client.loop_start()
+
+        else:    
+            print("Connection failed")
+            
+            print("Retrying ...")
+            time.sleep(1)
+            self.client.connect(MQTT_URL, MQTT_PORT, 60)
 
     
     def __init__(self):
@@ -85,6 +96,7 @@ class FederatedTask():
         self.client = mqtt.Client()
         self.client.connect(MQTT_URL, MQTT_PORT, 60)
         self.client.on_connect = self.on_connect
+        self.client.on_publish = self.on_publish
 
 
         # MQTT init for model update

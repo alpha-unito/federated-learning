@@ -4,6 +4,7 @@ from common import *
 from model_utils import federated_aggregation
 import json
 from json import JSONEncoder
+import time
 
 import numpy as np
 
@@ -36,7 +37,7 @@ class AggregatorActor(Actor):
             DISTRIBUTE THE MODEL
             """
             # publishes on MQTT topic
-            self.client.publish("topic/fl-update", json.dumps(averaged_weights, cls=self.NumpyArrayEncoder));
+            self.client.publish("topic/fl-update", json.dumps(averaged_weights, cls=self.NumpyArrayEncoder), qos=1);
 
             print("\npublished update to 'topic/fl-update'")
 
@@ -45,8 +46,17 @@ class AggregatorActor(Actor):
 
 
     def on_connect(client, userdata, flags, rc):
-            print(f"Connected with result code {rc}")
-            client.subscribe("topic/fl-broadcast")
+        if rc == 0:
+            print("Connected to broker")
+            client.loop_start()
+
+        else:    
+            print("Connection failed")
+            
+            print("Retrying ...")
+            time.sleep(1)
+            self.client.connect(MQTT_URL, MQTT_PORT, 60)
+
 
     def __init__(self, keep_alive: int = 60):
         # MQTT CLIENT CONNECTION TO MESSAGE BROKER

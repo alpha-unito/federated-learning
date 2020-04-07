@@ -17,7 +17,8 @@ class SelectorActor(Actor):
             if len(self.properties['connected_devices']) > 0:
                 print("\nStarting aggregation...\n")
                 ActorSystem().ask(aggregator_instance, Message(MsgType.AGGREGATION, self.properties['connected_devices']), 1)
-
+                self.properties['connected_devices'] = []
+                
             else:
                 print("\nNo devices connected, skipping aggregation. \n")
 
