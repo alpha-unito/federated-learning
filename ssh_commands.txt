@@ -11,3 +11,17 @@ COPIA RSYNC ON PROXY-JUMP:
     rsync -azv -e 'ssh -i /home/lore/.ssh/mancuso_federated -J lmancuso@130.192.137.199' /home/lore/mancuso.txt lmancuso@node05:/mnt/dataset/
 
     rsync -azv --append-verify --stats --human-readable --info=progress2 -e 'ssh -i /home/lore/.ssh/mancuso_federated -J lmancuso@130.192.137.199' /home/lore/Projects/federated-learning/res/ILSVRC2012_img_train lmancuso@node05:/mnt/dataset/IMAGENET | pv -lpes 1300000
+    
+COPIA PROGETTO:
+    rsync -azv --append-verify --stats --human-readable --info=progress2 -e 'ssh -i /home/lore/.ssh/mancuso_federated -J lmancuso@130.192.137.199' /home/lore/Projects/federated-learning/ lmancuso@node05:/home/lmancuso/
+
+
+
+ESECUZIONE REMOTA:
+
+    ssh -i /home/lore/Scaricati/TestEc2TFF.pem ubuntu@ec2-52-51-247-235.eu-west-1.compute.amazonaws.com "nohup python3 -u /home/ubuntu/test_server/counter.py > /home/ubuntu/test_server/log.txt &"
+
+
+    
+    ssh -i /home/lore/.ssh/mancuso_federated -J lmancuso@130.192.137.199' lmancuso@node05 "conda activate tff; nohup python3 -u /home/lmancuso/federated-learning/ImageClassification/task.py > /home/lmancuso/federated-learning/log.txt &"
+    

@@ -7,7 +7,7 @@ COSE DA FARE PER FAR PARTIRE UN CLIENT:
     rsync -av --progress -e "ssh -i /home/lore/Scaricati/TestEc2TFF.pem" /home/lore/Projects/test_server/ ubuntu@ec2-52-51-247-235.eu-west-1.compute.amazonaws.com:/home/ubuntu/test_server
 
 3) import dell'ambiente conda
-    bash Anaconda3-2020.02-Linux-x86_64.sh
+    bash Anaconda3-2020.02-Linux-x86_64.sh -yml
     source .bashrc
     conda env create -f tff_env.yml
 
