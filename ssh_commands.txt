@@ -1,0 +1,13 @@
+
+CONNESSIONE REMOTA CON PROXY-JUMP:
+    ssh -J your.jump.host remote.internal.host
+    
+    ssh -i /home/lore/.ssh/mancuso_federated -J lmancuso@130.192.137.199  lmancuso@node05
+
+
+COPIA RSYNC ON PROXY-JUMP:
+    rsync -azv -e 'ssh -A -J USER@PROXYHOST:PORT' foo/ dest:./foo/
+    
+    rsync -azv -e 'ssh -i /home/lore/.ssh/mancuso_federated -J lmancuso@130.192.137.199' /home/lore/mancuso.txt lmancuso@node05:/mnt/dataset/
+
+    rsync -azv --append-verify --stats --human-readable --info=progress2 -e 'ssh -i /home/lore/.ssh/mancuso_federated -J lmancuso@130.192.137.199' /home/lore/Projects/federated-learning/res/ILSVRC2012_img_train lmancuso@node05:/mnt/dataset/IMAGENET | pv -lpes 1300000
