@@ -23,5 +23,5 @@ ESECUZIONE REMOTA:
 
 
     
-    ssh -i /home/lore/.ssh/mancuso_federated -J lmancuso@130.192.137.199' lmancuso@node05 "conda activate tff; nohup python3 -u /home/lmancuso/federated-learning/ImageClassification/task.py > /home/lmancuso/federated-learning/log.txt &"
+    ssh -i /home/lore/.ssh/mancuso_federated -J lmancuso@130.192.137.199 lmancuso@node05 "conda activate tff; nohup python3 -u /home/lmancuso/federated-learning/ImageClassification/task.py > /home/lmancuso/federated-learning/log.txt &"
     

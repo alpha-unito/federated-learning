@@ -26,3 +26,7 @@ COSE DA FARE PER FAR PARTIRE UN SERVER:
     sudo apt-get install mosquitto
     sudo apt-get install mosquitto-clients
 
+
+Deep learning with elastic averaging
+tesi Paolo Viviani
+
