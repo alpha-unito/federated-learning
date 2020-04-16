@@ -24,7 +24,7 @@ EPOCHS = 1
 
 class FederatedTask():
 
-    def receive_update_from_server(weights):
+    def receive_update_from_server(self, weights):
         print("Updated weights received")
 
         self.model.set_weights(weights)
@@ -35,7 +35,6 @@ class FederatedTask():
 
 
     def training(self):
-
         self.model.fit_generator(self.train_it, steps_per_epoch=math.ceil(TOTAL_IMAGES / BATCH_SIZE), epochs=EPOCHS)
 
         return self.model
@@ -61,9 +60,7 @@ class FederatedTask():
 
         # publishes on MQTT topic
         publication = self.client.publish("topic/fl-broadcast", json.dumps(send_msg, cls=self.NumpyArrayEncoder), qos=1);
-        mid = publication[1]
-        print(f"Result code: {publication[0]}")
-        print(f"Request to send mid: {mid}")
+        print(f"Result code: {publication[0]} Mid: {publication[1]}")
 
         while publication[0] != 0:
             self.client.connect(MQTT_URL, MQTT_PORT, 60)
@@ -71,6 +68,21 @@ class FederatedTask():
             print(f"Result code: {publication[0]}")
 
 
+    @staticmethod
+    def on_message(client, userdata, msg):
+        print("\nNew model update received ")
+
+        try:
+            print(f"Loading Weights from message ...")
+            weights = json.loads(msg.payload)          
+            
+            userdata['callback'](weights)
+            
+        except Exception as e:
+            print('Error loading weights:', e)
+
+
+    @staticmethod
     def on_publish(client, userdata, mid):
         print(f"\npublished message to 'topic/fl-broadcast' with mid: {mid}")
         userdata['acks'].append(mid)
@@ -80,7 +92,7 @@ class FederatedTask():
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
             print("Connected to broker")
-            client.loop_start()
+            client.subscribe("topic/fl-update")
 
         else:    
             print("Connection failed")
@@ -88,6 +100,11 @@ class FederatedTask():
             print("Retrying ...")
             time.sleep(1)
             self.client.connect(MQTT_URL, MQTT_PORT, 60)
+
+
+    @staticmethod
+    def on_subscribe(client, userdata, mid, granted_qos):
+        print("Subscribed to topic/fl-update")    
 
 
     def __init__(self):
@@ -107,11 +124,13 @@ class FederatedTask():
                                             batch_size=BATCH_SIZE)
 
         # create mqtt client
-        self.client = mqtt.Client()
+        self.client = mqtt.Client(userdata={'callback': receive_update_from_server})
         self.client.connect(MQTT_URL, MQTT_PORT, 60)
+        # callbacks    
         self.client.on_connect = self.on_connect
+        self.client.on_subscribe = self.on_subscribe
         self.client.on_publish = self.on_publish
+        self.client.on_message = self.on_message
 
-        # MQTT init for model update
-        properties = {'callback': self.receive_update_from_server}
-        self.mqtt_listener = MqttListener(MQTT_URL, MQTT_PORT, properties)
+        
+        self.client.loop_start()
