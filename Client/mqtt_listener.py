@@ -15,7 +15,7 @@ class MqttListener():
             
             print(f"Loading Weights from message ...")
             
-            userdata['model'].set_weights(weights)
+            userdata['callback'].set_weights(weights)
             
             print("Model weights updated successfully.\n")
 
