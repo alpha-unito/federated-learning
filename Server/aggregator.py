@@ -56,10 +56,16 @@ class AggregatorActor(Actor):
             self.send(sender, 'Hello, World from Aggregator!')
 
 
+    @staticmethod
+    def on_publish(client, userdata, mid):
+        print(f"\npublished message to 'topic/fl-update' with mid: {mid}")
+        #userdata['acks'].append(mid)
+
+
+    @staticmethod
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
             print("Connected to broker")
-            client.loop_start()
 
         else:    
             print("Connection failed")
@@ -75,4 +81,6 @@ class AggregatorActor(Actor):
         self.client = mqtt.Client(userdata = collector)
         self.client.connect(MQTT_URL, MQTT_PORT, 60)
         self.client.on_connect = self.on_connect
+        self.client.on_publish = self.on_publish
         
+        self.client.loop_start()

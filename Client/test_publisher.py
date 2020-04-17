@@ -6,5 +6,5 @@ import paho.mqtt.client as mqtt
 if __name__ == "__main__":
     client = mqtt.Client()
     client.connect("localhost",1883,60)
-    client.publish("topic/fl-broadcast", "Hello world!", 0);
+    client.publish("topic/fl-update", "Hello world!", 0);
     client.disconnect();

@@ -9,7 +9,9 @@ if __name__ == "__main__":
 
     print(f"[CLIENT {client_id}]")
 
-    task.training()
+    #task.training()
 
     task.send_local_update_to_server()
     
+    while True:
+        pass

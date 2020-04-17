@@ -6,7 +6,6 @@ import keras
 from keras.preprocessing.image import ImageDataGenerator
 from json import JSONEncoder
 import numpy
-from mqtt_listener import MqttListener
 import math
 
 import time
@@ -85,7 +84,7 @@ class FederatedTask():
     @staticmethod
     def on_publish(client, userdata, mid):
         print(f"\npublished message to 'topic/fl-broadcast' with mid: {mid}")
-        userdata['acks'].append(mid)
+        #userdata['acks'].append(mid)
 
 
     @staticmethod
@@ -124,7 +123,7 @@ class FederatedTask():
                                             batch_size=BATCH_SIZE)
 
         # create mqtt client
-        self.client = mqtt.Client(userdata={'callback': receive_update_from_server})
+        self.client = mqtt.Client(userdata={'callback': self.receive_update_from_server})
         self.client.connect(MQTT_URL, MQTT_PORT, 60)
         # callbacks    
         self.client.on_connect = self.on_connect
