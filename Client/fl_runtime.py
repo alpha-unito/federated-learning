@@ -10,6 +10,8 @@ import math
 
 import time
 
+import logging
+
 MQTT_URL = 'localhost'
 MQTT_PORT = 1883
 
@@ -25,8 +27,8 @@ class FederatedTask():
 
     def wait_for_update_from_server(self):
         while True:
-            time.sleep(1)
-            print('check...')
+            time.sleep(10)
+
             if self.new_weights['update'] is not None:
                 #  set new weights
                 self.receive_update_from_server(self.new_weights['update'])
@@ -36,11 +38,11 @@ class FederatedTask():
 
 
     def receive_update_from_server(self, weights):
-        print("Updated weights received")
+        logging.info("Updated weights received")
 
         self.model.set_weights(weights)
 
-        print("Model weights updated successfully.\n")
+        logging.info("Model weights updated successfully.")
 
         self.training()
 
@@ -73,53 +75,50 @@ class FederatedTask():
 
         # publishes on MQTT topic
         publication = self.client.publish("topic/fl-broadcast", json.dumps(send_msg, cls=self.NumpyArrayEncoder), qos=1);
-        print(f"Result code: {publication[0]} Mid: {publication[1]}")
+        logging.debug(f"Result code: {publication[0]} Mid: {publication[1]}")
 
         while publication[0] != 0:
             self.client.connect(MQTT_URL, MQTT_PORT, 60)
             publication = self.client.publish("topic/fl-broadcast", json.dumps(send_msg, cls=self.NumpyArrayEncoder), qos=1);
-            print(f"Result code: {publication[0]}")
+            logging.debug(f"Result code: {publication[0]} Mid: {publication[1]}")
 
 
     @staticmethod
     def on_message(client, userdata, msg):
-        print("\nNew model update received ")
+        logging.info("New model update received ")
 
         try:
-            print(f"Loading Weights from message ...")
+            logging.info("Loading Weights from message ...")
             weights = json.loads(msg.payload)
-            print(f"Weights loaded successfully")
+
+            logging.info("Weights loaded successfully")
 
             userdata['new_weights']['update'] = weights
-            #userdata['callback'](weights)
-            
+
         except Exception as e:
-            print('Error loading weights:', e)
+            logging.warning(f'Error loading weights: {e}')
 
 
     @staticmethod
     def on_publish(client, userdata, mid):
-        print(f"\npublished message to 'topic/fl-broadcast' with mid: {mid}")
-        #userdata['acks'].append(mid)
+        logging.info(f"published message to 'topic/fl-broadcast' with mid: {mid}")
 
 
     @staticmethod
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
-            print("Connected to broker")
+            logging.info("Connected to broker")
             client.subscribe("topic/fl-update")
 
         else:    
-            print("Connection failed")
-            
-            print("Retrying ...")
+            logging.info("Connection failed. Retrying in 1 second...")
             time.sleep(1)
             self.client.connect(MQTT_URL, MQTT_PORT, 60)
 
 
     @staticmethod
     def on_subscribe(client, userdata, mid, granted_qos):
-        print("Subscribed to topic/fl-update")    
+        logging.info("Subscribed to topic/fl-update")
 
 
     def __init__(self):

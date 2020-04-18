@@ -4,65 +4,60 @@ import json
 from common import *
 from thespian.actors import *
 
+import logging
+extra = {'actor_name':'MQTT-LISTENER'}
 
 class MqttListener():
     
 
     @staticmethod
     def on_message(client, userdata, msg):
-        print("\nDevice communication received ")
+        logging.info("Device communication received", extra=extra)
 
         try:            
-            print('cast message obj to Device')
             msg_obj = json.loads(msg.payload)
-            print('device: ', msg_obj['device'])
+            logging.info(f"device: {msg_obj['device']}", extra=extra)
 
             new_device = Device(msg_obj['device'], msg_obj['data'])
 
         except:
-            print('Unsupported Device X')
+            logging.warning(f"Unsupported device message.", extra=extra)
 
         i = 0
         while i < len(userdata['connected_devices']):
             # replace with new weights
             if userdata['connected_devices'][i].get_id() == new_device.get_id():
-                print("Device already present, replacing ...")
+                logging.warning("Device already present, replacing ...", extra=extra)
+    
                 userdata['connected_devices'][i] = new_device
                 break
             i+=1
         
         # append new device
         if i == len(userdata['connected_devices']):
-            print("Adding new device ...")
+            logging.info("Adding new device ...", extra=extra)    
             userdata['connected_devices'].append(new_device)
 
-        print("Done.")
+        logging.info("Device successfully added.", extra=extra)
+
 
     @staticmethod
     def on_subscribe(client, userdata, mid, granted_qos):
-        print("Subscribed to topic/fl-broadcast")
+        logging.info("Subscribed to topic/fl-broadcast", extra=extra)
 
 
     @staticmethod
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
-            print("Connected to broker")
+            logging.info("Connected to broker", extra=extra)
             client.subscribe("topic/fl-broadcast")
 
         else:    
-            print("Connection failed")
+            logging.info("Connection failed. Retrying in 1 second...", extra=extra)
             
-            print("Retrying ...")
             time.sleep(1)
             self.client.connect(MQTT_URL, MQTT_PORT, 60)
 
-
-    @staticmethod
-    def mqtt_listener(client):
-        print("Start listening on MQTT channel ...")
-        client.loop_forever()
-        print("End listening on MQTT channel.")
-    
 
     def __init__(self, url: str, port: int, collector: dict, keep_alive: int = 60):
         # MQTT CLIENT CONNECTION TO MESSAGE BROKER
@@ -75,12 +70,3 @@ class MqttListener():
         client.on_message = self.on_message
         
         client.loop_start()
-
-        """
-        # START NEW THREAD WITH MQTT LISTENER
-        thr = threading.Thread(target = self.mqtt_listener, args = [client])
-        try:
-            thr.start() # Will run thread
-        except:
-            print('error on thread')
-        """

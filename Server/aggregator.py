@@ -8,6 +8,9 @@ import time
 
 import numpy as np
 
+import logging
+extra = {'actor_name':'AGGREGATOR'}
+
 MQTT_URL = 'localhost'
 MQTT_PORT = 1883
 
@@ -23,58 +26,49 @@ class AggregatorActor(Actor):
 
 
     def receiveMessage(self, message, sender):
-        print('aggregator receive message')
 
         if message.get_type() == MsgType.AGGREGATION:
-            print("\n**Aggregation process**\n")
             devices = message.get_body()
-            
             federated_train_data = [device.get_dataset() for device in devices]
 
-            print(f"federated aggregation on {len(federated_train_data)} devices.")
+            logging.info(f"Starting federated aggregation process on {len(federated_train_data)} devices.", extra=extra)
 
             averaged_weights = federated_aggregation(federated_train_data)
 
-            """
-            DISTRIBUTE THE MODEL
-            """
             # publishes on MQTT topic
             publication = self.client.publish("topic/fl-update", json.dumps(averaged_weights, cls=self.NumpyArrayEncoder), qos=1)
-            mid = publication[1]
-            print(f"Result code: {publication[0]}")
-            print(f"Request to send mid: {mid}")
+            logging.debug(f"Result code: {publication[0]} Mid: {publication[1]}", extra=extra)
+            
+            retries = 5
+            while publication[0] != 0 and retries > 0:
 
-            while publication[0] != 0:
                 self.client.connect(MQTT_URL, MQTT_PORT, 60)
                 publication = self.client.publish("topic/fl-update", json.dumps(averaged_weights, cls=self.NumpyArrayEncoder), qos=1)
-                print(f"Result code: {publication[0]}")
-
-            print("\npublished update to 'topic/fl-update'")
+                logging.debug(f"Result code: {publication[0]} Mid: {publication[1]}", extra=extra)
+                retries -= 1
+            
+            logging.info("Sent update to 'topic/fl-update'", extra=extra)
 
             # print("Terminating aggregator...")
             # ActorSystem().tell(self, ActorExitRequest())
 
-
-
         elif message.get_type() == MsgType.GREETINGS:
-            self.send(sender, 'Hello, World from Aggregator!')
+            logging.info("Init selector actor", extra=extra)
 
 
     @staticmethod
     def on_publish(client, userdata, mid):
-        print(f"\npublished message to 'topic/fl-update' with mid: {mid}")
-        #userdata['acks'].append(mid)
+        logging.info(f"Published message to 'topic/fl-update' with mid: {mid}", extra=extra)
 
 
     @staticmethod
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
-            print("Connected to broker")
+            logging.info("Connected to broker", extra=extra)
 
         else:    
-            print("Connection failed")
+            logging.warning("Connection failed. Retrying in 1 second...", extra=extra)
             
-            print("Retrying ...")
             time.sleep(1)
             self.client.connect(MQTT_URL, MQTT_PORT, 60)
 

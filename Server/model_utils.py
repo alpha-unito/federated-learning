@@ -2,11 +2,14 @@ import warnings
 import numpy as np
 import tensorflow as tf
 
+import logging
+extra = {'actor_name':'MODEL-UTILS'}
+
 warnings.simplefilter('ignore')
 tf.compat.v1.enable_v2_behavior()
 np.random.seed(0)
 
-print('\nEAGERLY: ', tf.executing_eagerly())
+logging.debug(f"EAGERLY: {tf.executing_eagerly()}", extra=extra)
 
 
 def federated_aggregation(federated_weights: list):
