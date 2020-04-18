@@ -1,3 +1,8 @@
+import logging
+
+# create logger
+logger = logging.getLogger('custom_logger')
+
 import datetime
 import json
 import paho.mqtt.client as mqtt
@@ -9,8 +14,6 @@ import numpy
 import math
 
 import time
-
-import logging
 
 MQTT_URL = 'localhost'
 MQTT_PORT = 1883
@@ -38,11 +41,11 @@ class FederatedTask():
 
 
     def receive_update_from_server(self, weights):
-        logging.info("Updated weights received")
+        logger.info("Updated weights received")
 
         self.model.set_weights(weights)
 
-        logging.info("Model weights updated successfully.")
+        logger.info("Model weights updated successfully.")
 
         self.training()
 
@@ -75,50 +78,50 @@ class FederatedTask():
 
         # publishes on MQTT topic
         publication = self.client.publish("topic/fl-broadcast", json.dumps(send_msg, cls=self.NumpyArrayEncoder), qos=1);
-        logging.debug(f"Result code: {publication[0]} Mid: {publication[1]}")
+        logger.debug(f"Result code: {publication[0]} Mid: {publication[1]}")
 
         while publication[0] != 0:
             self.client.connect(MQTT_URL, MQTT_PORT, 60)
             publication = self.client.publish("topic/fl-broadcast", json.dumps(send_msg, cls=self.NumpyArrayEncoder), qos=1);
-            logging.debug(f"Result code: {publication[0]} Mid: {publication[1]}")
+            logger.debug(f"Result code: {publication[0]} Mid: {publication[1]}")
 
 
     @staticmethod
     def on_message(client, userdata, msg):
-        logging.info("New model update received ")
+        logger.info("New model update received ")
 
         try:
-            logging.info("Loading Weights from message ...")
+            logger.info("Loading Weights from message ...")
             weights = json.loads(msg.payload)
 
-            logging.info("Weights loaded successfully")
+            logger.info("Weights loaded successfully")
 
             userdata['new_weights']['update'] = weights
 
         except Exception as e:
-            logging.warning(f'Error loading weights: {e}')
+            logger.warning(f'Error loading weights: {e}')
 
 
     @staticmethod
     def on_publish(client, userdata, mid):
-        logging.info(f"published message to 'topic/fl-broadcast' with mid: {mid}")
+        logger.info(f"published message to 'topic/fl-broadcast' with mid: {mid}")
 
 
     @staticmethod
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
-            logging.info("Connected to broker")
+            logger.info("Connected to broker")
             client.subscribe("topic/fl-update")
 
         else:    
-            logging.info("Connection failed. Retrying in 1 second...")
+            logger.info("Connection failed. Retrying in 1 second...")
             time.sleep(1)
             self.client.connect(MQTT_URL, MQTT_PORT, 60)
 
 
     @staticmethod
     def on_subscribe(client, userdata, mid, granted_qos):
-        logging.info("Subscribed to topic/fl-update")
+        logger.info("Subscribed to topic/fl-update")
 
 
     def __init__(self):

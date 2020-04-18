@@ -1,33 +1,35 @@
+import logging
+logger = logging.getLogger('custom_logger')
+extra = {'actor_name':'MQTT-LISTENER'}
+
 import paho.mqtt.client as mqtt
 import threading
 import json
 from common import *
 from thespian.actors import *
 
-import logging
-extra = {'actor_name':'MQTT-LISTENER'}
 
 class MqttListener():
     
 
     @staticmethod
     def on_message(client, userdata, msg):
-        logging.info("Device communication received", extra=extra)
+        logger.info("Device communication received", extra=extra)
 
         try:            
             msg_obj = json.loads(msg.payload)
-            logging.info(f"device: {msg_obj['device']}", extra=extra)
+            logger.info(f"device: {msg_obj['device']}", extra=extra)
 
             new_device = Device(msg_obj['device'], msg_obj['data'])
 
         except:
-            logging.warning(f"Unsupported device message.", extra=extra)
+            logger.warning(f"Unsupported device message.", extra=extra)
 
         i = 0
         while i < len(userdata['connected_devices']):
             # replace with new weights
             if userdata['connected_devices'][i].get_id() == new_device.get_id():
-                logging.warning("Device already present, replacing ...", extra=extra)
+                logger.warning("Device already present, replacing ...", extra=extra)
     
                 userdata['connected_devices'][i] = new_device
                 break
@@ -35,25 +37,25 @@ class MqttListener():
         
         # append new device
         if i == len(userdata['connected_devices']):
-            logging.info("Adding new device ...", extra=extra)    
+            logger.info("Adding new device ...", extra=extra)    
             userdata['connected_devices'].append(new_device)
 
-        logging.info("Device successfully added.", extra=extra)
+        logger.info("Device successfully added.", extra=extra)
 
 
     @staticmethod
     def on_subscribe(client, userdata, mid, granted_qos):
-        logging.info("Subscribed to topic/fl-broadcast", extra=extra)
+        logger.info("Subscribed to topic/fl-broadcast", extra=extra)
 
 
     @staticmethod
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
-            logging.info("Connected to broker", extra=extra)
+            logger.info("Connected to broker", extra=extra)
             client.subscribe("topic/fl-broadcast")
 
         else:    
-            logging.info("Connection failed. Retrying in 1 second...", extra=extra)
+            logger.info("Connection failed. Retrying in 1 second...", extra=extra)
             
             time.sleep(1)
             self.client.connect(MQTT_URL, MQTT_PORT, 60)
