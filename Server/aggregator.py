@@ -51,6 +51,10 @@ class AggregatorActor(Actor):
 
             print("\npublished update to 'topic/fl-update'")
 
+            # print("Terminating aggregator...")
+            # ActorSystem().tell(self, ActorExitRequest())
+
+
 
         elif message.get_type() == MsgType.GREETINGS:
             self.send(sender, 'Hello, World from Aggregator!')
