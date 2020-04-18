@@ -23,6 +23,18 @@ EPOCHS = 1
 
 class FederatedTask():
 
+    def wait_for_update_from_server(self):
+        while True:
+            time.sleep(1)
+            print('check...')
+            if self.new_weights['update'] is not None:
+                #  set new weights
+                self.receive_update_from_server(self.new_weights['update'])
+                
+                # reset
+                self.new_weights['update'] = None
+
+
     def receive_update_from_server(self, weights):
         print("Updated weights received")
 
@@ -31,6 +43,8 @@ class FederatedTask():
         print("Model weights updated successfully.\n")
 
         self.training()
+
+        self.send_local_update_to_server()
 
 
     def training(self):
@@ -73,9 +87,11 @@ class FederatedTask():
 
         try:
             print(f"Loading Weights from message ...")
-            weights = json.loads(msg.payload)          
-            
-            userdata['callback'](weights)
+            weights = json.loads(msg.payload)
+            print(f"Weights loaded successfully")
+
+            userdata['new_weights']['update'] = weights
+            #userdata['callback'](weights)
             
         except Exception as e:
             print('Error loading weights:', e)
@@ -123,7 +139,9 @@ class FederatedTask():
                                             batch_size=BATCH_SIZE)
 
         # create mqtt client
-        self.client = mqtt.Client(userdata={'callback': self.receive_update_from_server})
+        self.new_weights = {'update': None}
+
+        self.client = mqtt.Client(userdata={'new_weights': self.new_weights})
         self.client.connect(MQTT_URL, MQTT_PORT, 60)
         # callbacks    
         self.client.on_connect = self.on_connect
