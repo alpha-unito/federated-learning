@@ -1,5 +1,4 @@
 import logging
-logger = logging.getLogger('custom_logger')
 extra = {'actor_name':'MODEL-UTILS'}
 
 import warnings

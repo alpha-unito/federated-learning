@@ -1,5 +1,4 @@
 import logging
-logger = logging.getLogger('custom_logger')
 extra = {'actor_name':'SELECTOR'}
 
 from thespian.actors import *
@@ -19,13 +18,13 @@ class SelectorActor(Actor):
             aggregator_instance = message.get_body()
             
             if len(self.properties['connected_devices']) > 0:
-                logger.info(f"Starting aggregation on {len(self.properties['connected_devices'])} devices...", extra=extra)
+                logging.info(f"Starting aggregation on {len(self.properties['connected_devices'])} devices...", extra=extra)
 
-                ActorSystem().ask(aggregator_instance, Message(MsgType.AGGREGATION, self.properties['connected_devices']), 1)
+                ActorSystem(logDefs={}).ask(aggregator_instance, Message(MsgType.AGGREGATION, self.properties['connected_devices']), 1)
                 self.properties['connected_devices'] = []
                 
             else:
-                logger.warning("No devices connected, skipping aggregation.", extra=extra)
+                logging.warning("No devices connected, skipping aggregation.", extra=extra)
 
         elif message.get_type() == MsgType.GREETINGS:
             self.send(sender, 'Init Selector')
