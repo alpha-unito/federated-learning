@@ -7,7 +7,7 @@ from common import *
 from model_utils import federated_aggregation
 import json
 from json import JSONEncoder
-import time
+import sys
 
 import numpy as np
 
@@ -28,16 +28,22 @@ class AggregatorActor(Actor):
     def receiveMessage(self, message, sender):
 
         if message.get_type() == MsgType.AGGREGATION:
+            # PERFORM AGGREGATION ON DEVICES CONTAINED IN THE MESSAGE
             devices = message.get_body()
             federated_train_data = [device.get_dataset() for device in devices]
 
-            logging.info(f"Starting federated aggregation process on {len(federated_train_data)} devices.", extra=extra)
-
             averaged_weights = federated_aggregation(federated_train_data)
 
+            #SAVES CHECKPOINT
+
+
             # publishes on MQTT topic
+            total_bytes = 0
+            for layer_weights in averaged_weights:
+                total_bytes += layer_weights.nbytes
+
             publication = self.client.publish("topic/fl-update", json.dumps(averaged_weights, cls=self.NumpyArrayEncoder), qos=1)
-            logging.debug(f"Result code: {publication[0]} Mid: {publication[1]}", extra=extra)
+            logging.debug(f"Result code: {publication[0]} Mid: {publication[1]} PayloadWeight: {sys.getsizeof(total_bytes)}", extra=extra)
             
             retries = 5
             while publication[0] != 0 and retries > 0:

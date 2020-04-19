@@ -63,7 +63,6 @@ class MqttListener():
     def __init__(self, url: str, port: int, collector: dict, keep_alive: int = 60):
         # MQTT CLIENT CONNECTION TO MESSAGE BROKER
         client = mqtt.Client(userdata = collector)
-        #client.enable_logging(logging)
         
         client.connect(url, port, keep_alive)
 

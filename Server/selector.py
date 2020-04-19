@@ -10,6 +10,7 @@ from mqtt_listener import MqttListener
 
 class SelectorActor(Actor):
 
+
     def receiveMessage(self, message: Message, sender):
         """
         Actor for devices selection and aggregation call
@@ -27,7 +28,9 @@ class SelectorActor(Actor):
                 logging.warning("No devices connected, skipping aggregation.", extra=extra)
 
         elif message.get_type() == MsgType.GREETINGS:
-            self.send(sender, 'Init Selector')
+            logging.info('Init Selector', extra=extra)
+            #self.send(sender, 'Init Selector')
+
 
     def __init__(self):
         super().__init__()
