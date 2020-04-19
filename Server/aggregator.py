@@ -4,7 +4,7 @@ extra = {'actor_name':'AGGREGATOR'}
 import paho.mqtt.client as mqtt
 from thespian.actors import *
 from common import *
-from model_utils import federated_aggregation
+from model_utils import ModelUtils
 import json
 from json import JSONEncoder
 import sys
@@ -32,10 +32,10 @@ class AggregatorActor(Actor):
             devices = message.get_body()
             federated_train_data = [device.get_dataset() for device in devices]
 
-            averaged_weights = federated_aggregation(federated_train_data)
+            averaged_weights = self.model_utils.federated_aggregation(federated_train_data)
 
             #SAVES CHECKPOINT
-
+            self.model_utils.save_checkpoint()
 
             # publishes on MQTT topic
             total_bytes = 0
@@ -80,6 +80,8 @@ class AggregatorActor(Actor):
 
 
     def __init__(self, keep_alive: int = 60):
+        self.model_utils = ModelUtils()
+
         # MQTT CLIENT CONNECTION TO MESSAGE BROKER
         collector = {}
         self.client = mqtt.Client(userdata = collector)

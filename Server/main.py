@@ -5,15 +5,17 @@ extra = {'actor_name':'MAIN'}
 
 class actorLogFilter(logging.Filter):
     def filter(self, logrecord):
-        return 'actorAddress' in logrecord.__dict__
+        #return 'actorAddress' in logrecord.__dict__
+        return 'actor_name' not in logrecord.__dict__
 class notActorLogFilter(logging.Filter):
     def filter(self, logrecord):
-        return 'actorAddress' not in logrecord.__dict__
+        #return 'actorAddress' not in logrecord.__dict__
+        return 'actor_name' in logrecord.__dict__
 
 logcfg = { 'version': 1,
            'formatters': {
                'normal': {'format': '%(asctime)s [%(levelname)s] [%(actor_name)s] %(message)s'},
-               'actor': {'format': '%(asctime)s [%(levelname)s] %(actorAddress)s => %(message)s'}},
+               'actor': {'format': '%(asctime)s [%(levelname)s] => %(message)s'}},
            'filters': { 'isActorLog': { '()': actorLogFilter},
                         'notActorLog': { '()': notActorLogFilter}},
            'handlers': { 'h1': {'class': 'logging.StreamHandler',
@@ -40,7 +42,6 @@ if __name__ == "__main__":
     coordinator_instance = actor_system.createActor(CoordinatorActor)
 
     actor_system.ask(coordinator_instance, Message(MsgType.GREETINGS, ''), 1)
-    logging.info("starting 3", extra=extra)
 
     # TERMINATE ACTORS
     # ActorSystem(logDefs={}).tell(coordinator_instance, ActorExitRequest())
