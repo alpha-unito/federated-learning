@@ -18,14 +18,17 @@ class SelectorActor(Actor):
         if message.get_type() == MsgType.DEVICES_REQUEST:
             aggregator_instance = message.get_body()
             
-            if len(self.properties['connected_devices']) > 0:
-                logging.info(f"Starting aggregation on {len(self.properties['connected_devices'])} devices...", extra=extra)
-
-                ActorSystem(logDefs={}).ask(aggregator_instance, Message(MsgType.AGGREGATION, self.properties['connected_devices']), 1)
-                self.properties['connected_devices'] = []
-                
-            else:
+            if len(self.properties['connected_devices']) == 0:
                 logging.warning("No devices connected, skipping aggregation.", extra=extra)
+
+
+            logging.info(f"Selection on {len(self.properties['connected_devices'])} devices...", extra=extra)
+
+            ActorSystem(logDefs={}).ask(aggregator_instance, Message(MsgType.AGGREGATION, self.properties['connected_devices']), 1)
+            
+            # reset devices list
+            self.properties['connected_devices'] = []
+                
 
         elif message.get_type() == MsgType.GREETINGS:
             logging.info('Init Selector', extra=extra)
