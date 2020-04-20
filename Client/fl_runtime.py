@@ -58,7 +58,7 @@ class FederatedTask():
 
         self.model.fit_generator(self.train_it, steps_per_epoch=math.ceil(TOTAL_IMAGES / BATCH_SIZE), epochs=EPOCHS)
 
-        logging.info(f"[TRAIN-TIME] Completed local training in {time.time() - time_start / 60} minutes.")
+        logger.info(f"[TRAIN-TIME] Completed local training in {time.time() - time_start / 60} minutes.")
 
         return self.model
 
