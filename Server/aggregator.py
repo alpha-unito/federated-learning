@@ -30,12 +30,15 @@ class AggregatorActor(Actor):
         if message.get_type() == MsgType.AGGREGATION:
             # PERFORM AGGREGATION ON DEVICES CONTAINED IN THE MESSAGE
             devices = message.get_body()
-            federated_train_data = [device.get_dataset() for device in devices]
+            averaged_weights = self.model_utils.current_avg_weights
 
-            averaged_weights = self.model_utils.federated_aggregation(federated_train_data)
+            if len(devices) > 0:
+                federated_train_data = [device.get_dataset() for device in devices]
 
-            #SAVES CHECKPOINT
-            self.model_utils.save_checkpoint()
+                averaged_weights = self.model_utils.federated_aggregation(federated_train_data)
+
+                #SAVES CHECKPOINT
+                self.model_utils.save_checkpoint()
 
             # publishes on MQTT topic
             total_bytes = 0
@@ -45,18 +48,14 @@ class AggregatorActor(Actor):
             publication = self.client.publish("topic/fl-update", json.dumps(averaged_weights, cls=self.NumpyArrayEncoder), qos=1)
             logging.debug(f"Result code: {publication[0]} Mid: {publication[1]} PayloadWeight: {sys.getsizeof(total_bytes)}", extra=extra)
             
-            retries = 5
-            while publication[0] != 0 and retries > 0:
+            
+            while publication[0] != 0:
 
                 self.client.connect(MQTT_URL, MQTT_PORT, 60)
                 publication = self.client.publish("topic/fl-update", json.dumps(averaged_weights, cls=self.NumpyArrayEncoder), qos=1)
                 logging.debug(f"Result code: {publication[0]} Mid: {publication[1]}", extra=extra)
-                retries -= 1
             
             logging.info("Sent update to 'topic/fl-update'", extra=extra)
-
-            # print("Terminating aggregator...")
-            # ActorSystem(logDefs={}).tell(self, ActorExitRequest())
 
         elif message.get_type() == MsgType.GREETINGS:
             logging.info("Init selector actor", extra=extra)

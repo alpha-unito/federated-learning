@@ -75,4 +75,4 @@ class ModelUtils(metaclass = Singleton):
             result = p.search(weights_checkpoints[0])
             self.epoch = int(result.group(1))
         
-        self.current_avg_weights = []
+        self.current_avg_weights = self.model.get_weights()

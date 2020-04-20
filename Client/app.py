@@ -24,8 +24,5 @@ if __name__ == "__main__":
     logger.info(f"[CLIENT {client_id}]")
 
     task = fl_runtime.FederatedTask()
-    task.training()
-
-    task.send_local_update_to_server()
     
     task.wait_for_update_from_server()

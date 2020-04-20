@@ -16,13 +16,18 @@ class CoordinatorActor(Actor):
 
     def receiveMessage(self, message: Message, sender):
         if message.get_type() == MsgType.GREETINGS:
-
+        
             # self.send(sender, 'Init global Coordinator')
             logging.info('Init global Coordinator', extra=extra)
 
+            #selector
             selector_instance = ActorSystem(logDefs={}).createActor(SelectorActor)
             ActorSystem(logDefs={}).ask(selector_instance, Message(MsgType.GREETINGS, 'hi'), 1)
             
+            # aggregator
+            aggregator_instance = ActorSystem(logDefs={}).createActor(AggregatorActor)
+            ActorSystem(logDefs={}).ask(selector_instance, Message(MsgType.DEVICES_REQUEST, aggregator_instance), 1)
+
             while True:
                 
                 for i in range(0, SLEEP_TIME):
@@ -35,5 +40,5 @@ class CoordinatorActor(Actor):
                 # define a new aggregator instance and make a request to selector passing it
                 logging.info("Creating aggregator", extra=extra)
 
-                aggregator_instance = ActorSystem(logDefs={}).createActor(AggregatorActor)
+                
                 ActorSystem(logDefs={}).ask(selector_instance, Message(MsgType.DEVICES_REQUEST, aggregator_instance), 1)
