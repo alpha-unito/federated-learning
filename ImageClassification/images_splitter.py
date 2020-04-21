@@ -6,7 +6,7 @@ import random
 from datetime import datetime
 import math
 
-TEST_PATH = '/media/lore/6B6223601B584A05/IMAGENET/ILSVRC2012_img_train'
+TEST_PATH = '/media/lore/EA72A48772A459D9/ILSVRC2012/ILSVRC2012_img_train'
 TOTAL_CLASSES = 1000
 
 def generate_random_test_subset(path: str, images_percentage, destination_path) -> dict:
@@ -22,6 +22,15 @@ def generate_random_test_subset(path: str, images_percentage, destination_path) 
         #images_list = listdir(source_sub_path)
         images_list = [f for f in listdir(source_sub_path)
                         if isfile(join(source_sub_path, f))]
+        
+        i = 0
+        for i in range(len(images_list)):
+            number = int(images_list[i].split('_')[1].replace('.JPEG', ''))
+            images_list[i] = (number, images_list[i])
+
+        images_list.sort()
+
+        images_list = [i[1] for i in images_list]
 
         images_number = math.ceil(len(images_list) * (images_percentage / 100))
 
@@ -32,11 +41,11 @@ def generate_random_test_subset(path: str, images_percentage, destination_path) 
         
         for j in range(images_number):
             #pass
-            #print(f"    - Copying image number {j}: {images_list[j]}")
+            print(f"    - Copying image number {j}: {images_list[j]}")
             move(join(source_sub_path, images_list[j]), destination_sub_path) # source, destination                
     
 
-base_destination_path = '//media/lore/6B6223601B584A05/IMAGENET/ILSVRC2012_img_train_25_100'
+base_destination_path = '/media/lore/EA72A48772A459D9/ILSVRC2012/'
 new_directory = join(base_destination_path, str(int(datetime.now().timestamp())))
 
 try:
