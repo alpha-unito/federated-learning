@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Starting Image Classification task"
+echo "Starting Image Classification task in async mode"
 
 ~/anaconda3/bin/conda activate tff;
 cd ~/federated-learning/ImageClassification/
