@@ -2,9 +2,15 @@ import logging
 extra = {'actor_name':'MODEL-UTILS'}
 
 import time
+import math
 import warnings
 import numpy as np
+import pandas as pd
+from keras.preprocessing.image import ImageDataGenerator
+
 from common import Singleton
+from imagenet_classes import classes as in_classes
+
 import re
 import os
 from os import listdir
@@ -13,6 +19,10 @@ os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 import keras
+
+TOTAL_VAL_IMAGES = 50000
+TARGET_SIZE = (224, 224)
+BATCH_SIZE = 32
 
 class ModelUtils(metaclass = Singleton):
 
@@ -42,28 +52,29 @@ class ModelUtils(metaclass = Singleton):
         score = self.model.evaluate_generator(self.valid_it, steps=self.val_steps, use_multiprocessing=True, verbose=1)
         logging.info("Loss: ", score[0], "Accuracy: ", score[1])
         
+        self.epoch += 1
+
         #SAVES CHECKPOINT
         self.save_checkpoint()
         
         #SAVES LOG
-        self.save_log()
+        self.save_log(len(federated_weights))
         
         return averaged_weights
 
 
-    def save_log(self):
+    def save_log(self, nodes = 0):
         #log
         with open('./snapshots/log.csv', 'a') as fd:
             if self.epoch == 0:
-                fd.write("epoch;validation_accuracy;validation_loss\n")
+                fd.write("epoch;nodes;validation_accuracy;validation_loss\n")
 
-            fd.write(f"{current_epoch};{logs.get('val_accuracy', '')};{logs.get('val_loss', '')}\n")
+            fd.write(f"{self.epoch};{nodes}{logs.get('val_accuracy', '')};{logs.get('val_loss', '')}\n")
 
         logging.info(f"Saved log on 'snapshots/log.csv'.", extra=extra)
 
 
     def save_checkpoint(self):
-        self.epoch += 1
         self.model.save_weights(f"snapshots/Averaged-Weights-MobileNetV2-{self.epoch}.hdf5")
         logging.info(f"Saved checkpoint 'Averaged-Weights-MobileNetV2-{self.epoch}.hdf5'.", extra=extra)
 
@@ -119,6 +130,8 @@ class ModelUtils(metaclass = Singleton):
             pass
 
         self.model = keras.applications.mobilenet_v2.MobileNetV2()
+        # Compile the model
+        self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
         
         weights_checkpoints = self.get_last_weights('./snapshots')
         self.epoch = 0
@@ -141,7 +154,7 @@ class ModelUtils(metaclass = Singleton):
         logging.info(f"Generating train iterator from './res/ILSVRC2012_img_val/val/') ...")
         ts = time.time()
 
-        self.valid_it = generate_validation_iterator()
+        self.valid_it = self.generate_validation_iterator()
         self.val_steps = math.ceil(TOTAL_VAL_IMAGES / BATCH_SIZE)
 
         te = time.time()
