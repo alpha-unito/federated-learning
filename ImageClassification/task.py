@@ -252,5 +252,5 @@ if __name__ == "__main__":
 
     print(f"evaluate model in {val_steps} steps")
 
-    score = model.evaluate_generator(val_it, steps=val_steps, use_multiprocessing=True, verbose=1, callbacks=[checkpoint])
+    score = model.evaluate_generator(valid_it, steps=val_steps, use_multiprocessing=True, verbose=1)
     print("Loss: ", score[0], "Accuracy: ", score[1])

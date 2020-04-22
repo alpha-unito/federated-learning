@@ -37,9 +37,6 @@ class AggregatorActor(Actor):
 
                 averaged_weights = self.model_utils.federated_aggregation(federated_train_data)
 
-                #SAVES CHECKPOINT
-                self.model_utils.save_checkpoint()
-
             # publishes on MQTT topic
             total_bytes = 0
             for layer_weights in averaged_weights:

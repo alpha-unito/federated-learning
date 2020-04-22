@@ -56,4 +56,4 @@ except OSError:
 else:
     print ("Successfully created the directory %s " % new_directory)
 
-generate_random_test_subset(TEST_PATH, 25, new_directory)
+generate_random_test_subset(TEST_PATH, 50, new_directory)
