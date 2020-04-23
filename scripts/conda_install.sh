@@ -6,7 +6,7 @@ bash Anaconda3-2020.02-Linux-x86_64.sh -b -p $HOME/anaconda3
 
 rm -rf Anaconda3-2020.02-Linux-x86_64.sh
 
-
+~/anaconda3/bin/conda init bash
 
 # 4) activate environment
 ~/anaconda3/bin/conda update conda -y

@@ -3,6 +3,10 @@ import logging
 # create logger
 logger = logging.getLogger('custom_logger')
 
+
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+
 import datetime
 import json
 import paho.mqtt.client as mqtt
@@ -12,6 +16,9 @@ from keras.preprocessing.image import ImageDataGenerator
 from json import JSONEncoder
 import numpy
 import math
+import os
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 import time
 
@@ -19,7 +26,8 @@ MQTT_URL = 'localhost'
 MQTT_PORT = 1883
 
 
-IMAGENET_PATH = '/media/lore/EA72A48772A459D9/ILSVRC2012/ILSVRC2012_img_train/subset01'
+#IMAGENET_PATH = '/media/lore/EA72A48772A459D9/ILSVRC2012/ILSVRC2012_img_train/subset01'
+IMAGENET_PATH = 'res'
 TOTAL_IMAGES = 100
 TARGET_SIZE = (224, 224)
 BATCH_SIZE = 20
@@ -58,7 +66,7 @@ class FederatedTask():
 
         self.model.fit_generator(self.train_it, steps_per_epoch=math.ceil(TOTAL_IMAGES / BATCH_SIZE), epochs=EPOCHS)
 
-        logger.info(f"[TRAIN-TIME] Completed local training in {time.time() - time_start / 60} minutes.")
+        logger.info(f"[TRAIN-TIME] Completed local training in {(time.time() - time_start) / 60} minutes.")
 
         return self.model
 

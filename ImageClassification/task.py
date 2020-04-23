@@ -9,6 +9,9 @@ from keras.preprocessing.image import ImageDataGenerator
 import keras
 from keras.callbacks import ModelCheckpoint, CSVLogger
 
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+
 import pandas as pd
 
 from os import listdir
