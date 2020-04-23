@@ -16,19 +16,19 @@ from keras.preprocessing.image import ImageDataGenerator
 from json import JSONEncoder
 import numpy
 import math
-import os
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 import time
+import re
+import os
+from os import listdir
+from os.path import isfile, join
 
 MQTT_URL = 'localhost'
 MQTT_PORT = 1883
 
 
-#IMAGENET_PATH = '/media/lore/EA72A48772A459D9/ILSVRC2012/ILSVRC2012_img_train/subset01'
-IMAGENET_PATH = 'res'
-TOTAL_IMAGES = 100
+IMAGENET_PATH = '/media/lore/EA72A48772A459D9/ILSVRC2012/ILSVRC2012_img_train/subset01'
+TOTAL_IMAGES = 325000
 TARGET_SIZE = (224, 224)
 BATCH_SIZE = 20
 EPOCHS = 1
@@ -64,11 +64,36 @@ class FederatedTask():
 
         time_start = time.time()
 
-        self.model.fit_generator(self.train_it, steps_per_epoch=math.ceil(TOTAL_IMAGES / BATCH_SIZE), epochs=EPOCHS)
+        train_history = self.model.fit_generator(self.train_it, steps_per_epoch=math.ceil(TOTAL_IMAGES / BATCH_SIZE), epochs=EPOCHS)
 
         logger.info(f"[TRAIN-TIME] Completed local training in {(time.time() - time_start) / 60} minutes.")
 
+        self.epoch += 1
+
+        #SAVES CHECKPOINT
+        self.save_checkpoint()
+        
+        #SAVES LOG
+        print(train_history.history)
+        self.save_log(train_history.history['loss'][-1], train_history.history['accuracy'][-1], (time.time() - time_start))
+        
         return self.model
+
+
+    def save_log(self, loss, accuracy, time):
+        #log
+        with open('./snapshots/log.csv', 'a') as fd:
+            if self.epoch == 0:
+                fd.write("epoch;accuracy;loss;time\n")
+
+            fd.write(f"{self.epoch};{accuracy};{loss};{time}\n")
+
+        logger.info(f"Saved log on 'snapshots/log.csv'.")
+
+
+    def save_checkpoint(self):
+        self.model.save_weights(f"snapshots/Local-Weights-node01-MobileNetV2-{self.epoch}.hdf5")
+        logger.info(f"Saved checkpoint 'Local-Weights-node01-MobileNetV2-{self.epoch}.hdf5'.")
 
 
     class NumpyArrayEncoder(JSONEncoder):
@@ -137,13 +162,41 @@ class FederatedTask():
         logger.info("Subscribed to topic/fl-update")
 
 
+    def get_last_weights(self, path):
+        weights = [join(path, f) for f in listdir(path)
+                if isfile(join(path, f)) and 'Averaged-Weights' in f]
+
+        weights.sort(reverse=True)
+
+        return weights
+
+
     def __init__(self):
+
+        try:
+            os.mkdir("snapshots")
+        except:
+            pass
+
         # INIT MODEL
         self.model = keras.applications.mobilenet_v2.MobileNetV2()
         self.model.summary()
         # Compile the model
         self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
         
+        weights_checkpoints = self.get_last_weights('./snapshots')
+        self.epoch = 0
+
+        if len(weights_checkpoints) > 0:
+            logging.info(f"Loading Weights from {weights_checkpoints[0]} ...", extra=extra)
+            self.model.load_weights(weights_checkpoints[0])
+            logging.info("Done.\n", extra=extra)
+
+            # get last epoch number
+            p = re.compile("-(\w+).hdf5")
+            result = p.search(weights_checkpoints[0])
+            self.epoch = int(result.group(1))
+
         # create generator
         datagen = ImageDataGenerator()
         # prepare an iterators for each dataset

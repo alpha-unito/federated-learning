@@ -18,10 +18,8 @@ import re
 import os
 from os import listdir
 from os.path import isfile, join
-"""
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
-"""
 
 import keras
 
@@ -54,8 +52,7 @@ class ModelUtils(metaclass = Singleton):
         
         # make test on validation iterator
         logging.info(f"evaluate model in {self.val_steps} steps")
-        #score = self.model.evaluate_generator(self.valid_it, steps=self.val_steps, use_multiprocessing=True, verbose=1)
-        score = self.model.evaluate_generator(self.valid_it, steps=1, use_multiprocessing=True, verbose=1)
+        score = self.model.evaluate_generator(self.valid_it, steps=self.val_steps, use_multiprocessing=True, verbose=1)
         logging.info(f"Val Loss: {score[0]} , Val Accuracy: {score[1]}")
         
         self.epoch += 1
@@ -64,7 +61,7 @@ class ModelUtils(metaclass = Singleton):
         self.save_checkpoint()
         
         #SAVES LOG
-        self.save_log(len(federated_weights), score[0], score[1])
+        self.save_log(score[0], score[1], len(federated_weights))
         
         return averaged_weights
 
