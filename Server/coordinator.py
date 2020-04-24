@@ -33,8 +33,8 @@ class CoordinatorActor(Actor):
                 for i in range(0, SLEEP_TIME):
                     #if i % 10 == 0:
                     if i % (60 * 10) == 0:
-                        #logging.info(f'Minutes until aggregation: {(SLEEP_TIME - i) / 60}', extra=extra)
-                        logging.info(f'Seconds until aggregation: {(SLEEP_TIME - i)}', extra=extra)
+                        logging.info(f'Minutes until aggregation: {(SLEEP_TIME - i) / 60}', extra=extra)
+                        #logging.info(f'Seconds until aggregation: {(SLEEP_TIME - i)}', extra=extra)
                     time.sleep(1)
 
                 # define a new aggregator instance and make a request to selector passing it
