@@ -8,8 +8,8 @@ import time
 from aggregator import AggregatorActor
 from selector import SelectorActor
 
-#SLEEP_TIME = 60 * 120 
-SLEEP_TIME = 60 
+SLEEP_TIME = 60 * 120 
+#SLEEP_TIME = 60 
 
 class CoordinatorActor(Actor):
     
@@ -31,8 +31,8 @@ class CoordinatorActor(Actor):
             while True:
                 
                 for i in range(0, SLEEP_TIME):
-                    #if i % (60 * 10) == 0:
-                    if i % 10 == 0:
+                    #if i % 10 == 0:
+                    if i % (60 * 10) == 0:
                         #logging.info(f'Minutes until aggregation: {(SLEEP_TIME - i) / 60}', extra=extra)
                         logging.info(f'Seconds until aggregation: {(SLEEP_TIME - i)}', extra=extra)
                     time.sleep(1)
