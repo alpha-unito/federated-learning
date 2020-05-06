@@ -206,7 +206,7 @@ if __name__ == "__main__":
         last_epoch = int(result.group(1))
 
     # Compile the model
-    rms_optimizer = keras.optimizers.RMSprop(learning_rate=0.045, rho=0.98)
+    rms_optimizer = keras.optimizers.Adam(learning_rate=0.045, rho=0.98)
     model.compile(loss='categorical_crossentropy', optimizer=rms_optimizer, metrics=['accuracy'])
 
     checkpoint = CustomModelCheckpointCallback(starting_epoch=last_epoch)
