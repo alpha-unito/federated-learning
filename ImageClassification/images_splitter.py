@@ -41,12 +41,14 @@ def generate_random_test_subset(path: str, images_percentage, destination_path) 
         
         for j in range(images_number):
             #pass
-            print(f"    - Copying image number {j}: {images_list[j]}")
+            print(f"    - Moving image number {j}: {images_list[j]}")
             move(join(source_sub_path, images_list[j]), destination_sub_path) # source, destination                
     
 
-base_destination_path = '/media/lore/EA72A48772A459D9/ILSVRC2012/'
+base_destination_path = TEST_PATH
 new_directory = join(base_destination_path, str(int(datetime.now().timestamp())))
+
+subset = "subset08"
 
 try:
     os.mkdir(new_directory)
@@ -56,4 +58,4 @@ except OSError:
 else:
     print ("Successfully created the directory %s " % new_directory)
 
-generate_random_test_subset(TEST_PATH, 50, new_directory)
+generate_random_test_subset(join(TEST_PATH, subset), 50, new_directory)

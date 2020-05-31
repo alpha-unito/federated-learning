@@ -23,6 +23,6 @@ if __name__ == "__main__":
     
     logger.info(f"[CLIENT {client_id}]")
 
-    task = fl_runtime.FederatedTask()
+    task = fl_runtime.FederatedTask(client_id)
     
     task.wait_for_update_from_server()

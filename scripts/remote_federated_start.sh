@@ -1,3 +1,5 @@
+## !! NOT WORKING !!
+
 PROXY="lmancuso@130.192.137.199"
 CERT_PATH="/home/lore/Scaricati/mancuso_federated"
 
@@ -20,3 +22,10 @@ ssh -i $CERT_PATH -J $PROXY lmancuso@node04 "bash ~/federated-learning/scripts/c
 # coordinator
 #echo "start coordinator"
 #ssh -i $CERT_PATH -J $PROXY lmancuso@coordinator "bash ~/federated-learning/scripts/server_start.sh"
+
+
+ssh -i "/home/lore/Scaricati/mancuso_federated" -J "lmancuso@130.192.137.199" lmancuso@device12 "bash ~/federated-learning/scripts/client_start.sh"
+
+
+ssh -i "/home/lore/Scaricati/mancuso_federated" -J "lmancuso@130.192.137.199" lmancuso@device12 ". ~/.bashrc; conda activate tff; cd ~/federated-learning/Client; nohup python3 -u app.py > ../log.txt &"
+

@@ -27,10 +27,10 @@ MQTT_URL = '172.20.8.119'
 MQTT_PORT = 1883
 
 
-IMAGENET_PATH = '/mnt/dataset/subset01'
-TOTAL_IMAGES = 325000
+IMAGENET_PATH = '/home/lmancuso/dataset/subset'
+TOTAL_IMAGES = 53250
 TARGET_SIZE = (224, 224)
-BATCH_SIZE = 20
+BATCH_SIZE = 32
 EPOCHS = 1
 
 
@@ -92,8 +92,8 @@ class FederatedTask():
 
 
     def save_checkpoint(self):
-        self.model.save_weights(f"snapshots/Local-Weights-node01-MobileNetV2-{self.epoch}.hdf5")
-        logger.info(f"Saved checkpoint 'Local-Weights-node01-MobileNetV2-{self.epoch}.hdf5'.")
+        self.model.save_weights("snapshots/Local-Weights-node01-MobileNetV2-{epoch:02d}.hdf5".format(epoch=self.epoch))
+        logger.info("Saved checkpoint 'Local-Weights-node01-MobileNetV2-{epoch:02d}.hdf5'.".format(epoch=self.epoch))
 
 
     class NumpyArrayEncoder(JSONEncoder):
@@ -110,7 +110,7 @@ class FederatedTask():
 
         # build message object
         send_msg = {
-            'device': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'device': self.client_id,
             'data': model_weights
         }
 
@@ -171,7 +171,9 @@ class FederatedTask():
         return weights
 
 
-    def __init__(self):
+    def __init__(self, client_id=-1):
+
+        self.client_id = client_id
 
         try:
             os.mkdir("snapshots")
