@@ -6,7 +6,7 @@ Supervisors: Prof. Roberto Esposito, Prof. Marco Aldinucci
 
 University of Turin, Computer Science Department
 
-July 2020
+2020
 
 # Horizontal Federated Learning
 
