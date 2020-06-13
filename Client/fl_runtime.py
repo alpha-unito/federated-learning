@@ -27,8 +27,8 @@ MQTT_URL = '172.20.8.119'
 MQTT_PORT = 1883
 
 
-IMAGENET_PATH = '/home/lmancuso/dataset/subset'
-TOTAL_IMAGES = 53250
+IMAGENET_PATH = '/mnt/dataset/subset'
+TOTAL_IMAGES = 82000
 TARGET_SIZE = (224, 224)
 BATCH_SIZE = 32
 EPOCHS = 1
