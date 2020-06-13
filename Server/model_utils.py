@@ -78,9 +78,9 @@ class ModelUtils(metaclass = Singleton):
 
 
     def save_checkpoint(self):
-        self.model.save_weights(f"snapshots/Averaged-Weights-MobileNetV2-{self.epoch}.hdf5")
-        logging.info(f"Saved checkpoint 'Averaged-Weights-MobileNetV2-{self.epoch}.hdf5'.", extra=extra)
-
+        self.model.save_weights("snapshots/Local-Weights-node01-MobileNetV2-{epoch:02d}.hdf5".format(epoch=self.epoch))
+        logging.info("Saved checkpoint 'Local-Weights-node01-MobileNetV2-{epoch:02d}.hdf5'.".format(epoch=self.epoch), extra=extra)
+    
 
     def generate_validation_iterator(self):
         # IMAGES

@@ -1,4 +1,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
+
+import os
+# SET CPU ONLY MODE
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+
+
 from alex_net import alex_net
 import tensorflow as tf
 import numpy as np
@@ -29,19 +35,21 @@ config = ConfigProto()
 config.gpu_options.allow_growth = True
 session = InteractiveSession(config=config)
 
-#IMAGENET_PATH = './res/'
-IMAGENET_PATH = '/media/lore/B6C8D9F4C8D9B33B/Users/lorym/Downloads/IMAGENET'
+#IMAGENET_PATH = '../../'
+IMAGENET_PATH = '/media/lore/EA72A48772A459D9/ILSVRC2012'
 
-VALIDATION_LABELS = '../..//res/ILSVRC2012_devkit_t12/data/ILSVRC2012_validation_ground_truth.txt'
+VALIDATION_LABELS = '../../ILSVRC2012_devkit_t12/data/ILSVRC2012_validation_ground_truth.txt'
 
 TOTAL_VAL_IMAGES = 50000
-TOTAL_TRAIN_IMAGES = 961832
-#TOTAL_TRAIN_IMAGES =320336
+
+TOTAL_TRAIN_IMAGES = 75000
+#TOTAL_TRAIN_IMAGES = 163000
 
 TARGET_SIZE = (224, 224)
-
 BATCH_SIZE = 32
 EPOCHS = 40
+
+
 
 print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
 try: 
@@ -49,6 +57,8 @@ try:
 except: 
     print("Invalid device or cannot modify virtual devices once initialized. ")
     pass 
+
+
 """
 # NB:
 def predict(model, x_val):
@@ -67,7 +77,7 @@ def generate_train_iterator():
     datagen = ImageDataGenerator()
 
     #train_path = join(IMAGENET_PATH, 'ILSVRC2012_img_train/')
-    train_path = join(IMAGENET_PATH, 'ILSVRC2012_img_train_75_100/')
+    train_path = '../../subset01_24'
     train_it = datagen.flow_from_directory(train_path,
                                            target_size=TARGET_SIZE,
                                            class_mode='categorical',
@@ -206,8 +216,7 @@ if __name__ == "__main__":
         last_epoch = int(result.group(1))
 
     # Compile the model
-    rms_optimizer = keras.optimizers.Adam(learning_rate=0.045, rho=0.98)
-    model.compile(loss='categorical_crossentropy', optimizer=rms_optimizer, metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     checkpoint = CustomModelCheckpointCallback(starting_epoch=last_epoch)
 

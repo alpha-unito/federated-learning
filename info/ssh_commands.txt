@@ -17,7 +17,7 @@ COPIA PROGETTO:
 
 
 COPIA PROGRESSI DAL NODO:
-    rsync -azv --append-verify --stats --human-readable --info=progress2 -e 'ssh -i /home/lore/.ssh/mancuso_federated -J lmancuso@130.192.137.199' lmancuso@node05:/home/lmancuso/federated-learning/ /home/lore/Projects/node05-progresses 
+    rsync -azv --append-verify --stats --human-readable --info=progress2 --exclude="res" -e 'ssh -i /home/lore/.ssh/mancuso_federated -J lmancuso@130.192.137.199' lmancuso@node05:/home/lmancuso/federated-learning/ /home/lore/Projects/node05-progresses 
 
 
 ESECUZIONE REMOTA:

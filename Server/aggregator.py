@@ -11,7 +11,7 @@ import sys
 
 import numpy as np
 
-MQTT_URL = 'localhost'
+MQTT_URL = '172.20.8.119'
 MQTT_PORT = 1883
 
 

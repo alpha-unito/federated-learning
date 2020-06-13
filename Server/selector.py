@@ -38,4 +38,4 @@ class SelectorActor(Actor):
     def __init__(self):
         super().__init__()
         self.properties = {'connected_devices': []}
-        mqtt_listener = MqttListener('localhost', 1883, self.properties)
+        mqtt_listener = MqttListener('172.20.8.119', 1883, self.properties)

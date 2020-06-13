@@ -1,0 +1,18 @@
+1 - BATCH_SIZE = 128, learning rate 0,045 e optimizer Adam -> lentissimo, quasi nessun miglioramento DOPO BEN 5 EPOCHE
+2 - BATCH_SIZE = 128, leraning rate 0,045 e optimizer RMSprop -> molto lento, dopo 7 epoche è ancora allo 0%
+3 - BATCH_SIZE = 128, learnign rate 0,001(default) e optimizer Adam -> ottima convergenza 
+
+4 - BATCH_SIZE = 64, learning rate 0,045 e optimizer Adam -> 
+5 - BATCH_SIZE = 64, leraning rate 0,045 e optimizer RMSprop -> 
+6 - BATCH_SIZE = 64, learnign rate 0,001(default) e optimizer Adam -> 
+
+
+
+*NOTA* -> USANDO 16 WORKER ASINCRONI, quello che succede nel paper è che vengono processate 128 * 16 immagini alla volta e per ciascun passo
+
+          Se andiamo a mettere un batch size di 32, otteniamo una convergenza più veloce in quanto propaghiamo all'indietro l'errore molte più volte.
+
+          Se andiamo a mettere un batch size di 128, propaghiamo all'indietro l'errore solo 1/4 delle volte.
+
+          Se usiamo come nel paper 2048 immagini alla volta, effettuiamo 64 volte in meno il numero di passi.
+          (come suggerisce Iacopo, usare il maggior numero di immagini porta ad un risultato migliore)
