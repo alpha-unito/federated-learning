@@ -1,6 +1,14 @@
-# Horizontal Federated Learning
+# Federated Learning: an empirical analysis of convergence rates in different learning regimes
 
-This is a thesis project for the master's degree in computer science.
+Author: Lorenzo Mancuso
+
+Supervisors: Prof. Roberto Esposito, Prof. Marco Aldinucci
+
+University of Turin, Computer Science Department
+
+July 2020
+
+# Horizontal Federated Learning
 
 Federated learning distributes the machine learning process over to the edge. It enables mobile phones to collaboratively learn a shared model using the training data on the device and keeping the data on device. It decouples the need for doing machine learning with the need to store the data in the cloud. Functionally, a mobile device that is a part of a FL computing architecture, downloads a model that is meant for running on mobile devices. It then runs the model locally on the phone and improves it by learning from data stored there. Subsequently, it summarizes the changes as a small update, typically containing the model parameters and corresponding weights. The update to the model is then sent to the cloud or central server using encrypted communication, for example, homomorphic encryption (HE). This update is then averaged with other user updates to improve the shared model. Most importantly, all the training data remains on user’s device, and no individual updates are identifiably stored in the cloud.
 
@@ -31,12 +39,22 @@ The main actors in the system are:
 
 This implementation has only one actor for each type described before.
 
+### Server actors sequence diagram
+
+![server_actors](/assets/server_actors_states.png)
+
+### Server workflow
+
+![server_workflow](/assets/server_workflow.png)
+
 ## Client Architecture
 The device’s first responsibility in on-device learning is to maintain a repository of locally collected data for model training and evaluation. The FL runtime, when provided a task by the FL server, accesses an appropriate example store to compute model updates, or evaluate model quality on held out data.
 
 ![client](/assets/client_architecture.png)
 
+### Client workflow
 
+![client_workflow](/assets/client_workflow.png)
 
 # Project
 
@@ -68,12 +86,3 @@ python Client/app.py
 # References
 * Keith Bonawitz, Hubert Eichner, Wolfgang Grieskamp, Dzmitry Huba, Alex Ingerman, Vladimir Ivanov, Chloe Kiddon, Jakub Konecn, Stefano Mazzocchi, H. Brendan McMahan, Timon Van Overveldt, David Petrou, Daniel Ramage, Jason Roselander - Google Inc., Mountain View, CA, USA. [TOWARDS FEDERATED LEARNING AT SCALE: SYSTEM DESIGN](https://arxiv.org/pdf/1902.01046.pdf). 
 
-
-
-# Alpha version notes
-
-In the current alpha version, devices can't be rejected from the server's Selector. Every time a device communicates to the server, it starts a federated aggregation process with only its own data . 
-
-Each device uses a simulation function for build fake data to send to the server. This choice has been made for test purpose and influences the process of encode and decode in MQTT network communication.
-
-In future versions an image recognition task will be added and each client will perform it on different samples with no repetition. 
